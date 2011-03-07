@@ -224,6 +224,9 @@ function todo_complete($todo_guid) {
 		}
 
 		add_entity_relationship($submission->getGUID(), SUBMISSION_RELATIONSHIP, $todo_guid);
+		
+		// Add a relationship stating that the user has completed the todo
+		add_entity_relationship($current_user_id, COMPLETED_RELATIONSHIP, $todo_guid);
 
 		// Accept the todo when completing (if not already accepted)
 		user_accept_todo($current_user_id, $todo_guid);
