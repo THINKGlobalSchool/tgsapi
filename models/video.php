@@ -10,7 +10,6 @@ require_once 'functions.php';
  *
  * @todo when caltura video plugin will support elgg 1.8, we need to rewrite method in order to use this plugin
  *
- * @global stdClass $CONFIG
  * @param string $title video's title
  * @param string $caption video's caption
  * @param string $tags tags (comma separated)
@@ -20,14 +19,13 @@ require_once 'functions.php';
  */
 function video_add($title, $caption = '', $tags = '', $lat, $long) {
 	require_once dirname(dirname(__FILE__)) .'/config.php';
-    global $CONFIG;
 
     if (count($_FILES) == 0) {
         return 'no files';
     }
 
     $username = get_loggedin_user()->username;
-    $uploaddir = $CONFIG->dataroot . 'tmp_videos/';
+    $uploaddir = elgg_get_data_path() . 'tmp_videos/';
 
     foreach($_FILES as $file) {
 		$filename = $username . '_' . time() . '_' . $file['name'];
@@ -45,5 +43,3 @@ function video_add($title, $caption = '', $tags = '', $lat, $long) {
     
     return true;
 }
-
-?>

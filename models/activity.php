@@ -30,13 +30,10 @@ function activity_list($limit = 10, $offset = 0) {
 /**
  * Get activity details.
  *
- * @global stdClass $CONFIG
  * @param stdClass $activity
  * @return array
  */
 function activity_details($activity) {
-    global $CONFIG;
-
     if (!is_object($activity) ) {
         return 'NO ACTIVITY';
     }
@@ -81,7 +78,7 @@ function activity_details($activity) {
             $data['brief_description'] = 'added the photo '. $entity->title .' to album '.$container->title;
             $data['description'] = $entity->description;
             $data['time_created'] = $standart_data['time_created'];
-            $data['image_url'] =  $CONFIG->wwwroot . 'pg/photos/thumbnail/' . $entity->guid . '/large';
+            $data['image_url'] =  elgg_get_site_url() . 'pg/photos/thumbnail/' . $entity->guid . '/large';
             $data['comments_count'] = $standart_data['comments_count'];
 
             $data = array_merge($data, $user_data);
@@ -108,9 +105,9 @@ function activity_details($activity) {
             $text = 'Album contains ' . $cnt . ' ' . ($cnt > 1 ? 'photos' : 'photo');
             
             if ($entity->cover) {
-                $album_cover = $CONFIG->wwwroot . 'pg/photos/thumbnail/' . $entity->cover . '/small/';
+                $album_cover = elgg_get_site_url() . 'pg/photos/thumbnail/' . $entity->cover . '/small/';
             } else {
-                $album_cover = $CONFIG->wwwroot . 'mod/tidypics/graphics/image_error_small.png';
+                $album_cover = elgg_get_site_url() . 'mod/tidypics/graphics/image_error_small.png';
             }
 
             $standart_data['image_url'] =  $album_cover;
@@ -132,7 +129,7 @@ function activity_details($activity) {
 			// push them to subarray
 			foreach ($images as $image) {
 				$data['images'][] =  array(
-					'image_url' => $CONFIG->wwwroot . 'pg/photos/thumbnail/' . $image->guid . '/large',
+					'image_url' => elgg_get_site_url() . 'pg/photos/thumbnail/' . $image->guid . '/large',
 					'title' => $image->title,
 					'caption' => $image->description,
 					'tags' => is_array($image->tags) ? implode(',', $image->tags) : (string)$image->tags
@@ -259,5 +256,3 @@ function activity_details($activity) {
 
     return array_merge($standart_data, $object_details, $user_data);
 }
-
-?>

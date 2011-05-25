@@ -67,5 +67,3 @@ function comments_list($object_id, $limit = 10, $offset = 0) {
         return 0;
     }
 }
-
-?>

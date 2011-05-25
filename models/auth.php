@@ -92,5 +92,3 @@ function auth_get_google_token($username, $password) {
         return $token;
     }
 }
-
-?>

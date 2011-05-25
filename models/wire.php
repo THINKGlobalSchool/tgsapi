@@ -29,6 +29,3 @@ function api_post_to_wire($text, $lat, $long) {
 
     return $ret_val;
 }
-
-
-?>

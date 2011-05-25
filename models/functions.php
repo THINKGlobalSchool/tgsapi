@@ -98,13 +98,11 @@ function get_user_avatar($user_id) {
 /**
  * Get the path for icon of given activity type
  *
- * @global stdClass $CONFIG
  * @param string $subtype
  * @return string
  */
 function get_category_icon($subtype) {
-    global $CONFIG;
-    $path = $CONFIG->wwwroot . 'category_icons/';
+    $path = elgg_get_site_url() . 'category_icons/';
     return $path . $subtype . '.png';
 }
 
@@ -723,5 +721,3 @@ function get_activities($subtypes = '', $action_type = '', $limit = 10, $offset 
 	// Get data
 	return get_data($sql);
 }
-
-?>

@@ -9,26 +9,32 @@
  * @link http://www.thinkglobalschool.com
  */
 
-
-// Register event
-register_elgg_event_handler('init', 'system', 'tgsapi_init');
-
-// Admin menu
-register_elgg_event_handler('pagesetup','system','tgsapi_adminmenu');
+// require models
+require_once 'models/auth.php';
+require_once 'models/activity.php';
+require_once 'models/comment.php';
+require_once 'models/photo.php';
+require_once 'models/album.php';
+require_once 'models/profile.php';
+require_once 'models/wire.php';
+require_once 'models/video.php';
+require_once 'models/location.php';
+require_once 'models/stats.php';
+require_once 'models/todo.php';
 
 // Include functions
 require_once 'models/functions.php';
+
+// Register event
+elgg_register_event_handler('init', 'system', 'tgsapi_init');
 
 /**
  * Initialize api to register api functions.
  * To register new function add expose_function definition
  *
- * @global stdClass $CONFIG
  */
 function tgsapi_init() {
 	
-	global $CONFIG;
-
 	// Get the authentification token
 	expose_function("auth.get_infinity_token", "auth_get_infinity_token", array(
 			'username' => array ('type' => 'string'),
@@ -256,34 +262,17 @@ function tgsapi_init() {
 			)
 		), "Get todo detail", 'GET', false, true);
 
-	elgg_register_action("tgsapi/delete_token", $CONFIG->pluginspath."tgsapi/actions/delete_token.php", 'admin');
+	elgg_register_action("tgsapi/delete_token", elgg_get_plugins_path() . "tgsapi/actions/delete_token.php", 'admin');
 
-	
+	// Admin menu
+	elgg_register_event_handler('pagesetup','system','tgsapi_adminmenu');
 }
 
 /**
  * Sets up API admin menu. Triggered on pagesetup.
  */
-function tgsapi_adminmenu()
-{
-	global $CONFIG;
-	if (isadminloggedin()) {
-		elgg_add_submenu_item(array('text' => elgg_echo('tgsapi:admin'), 
-									'href' => $CONFIG->url . "mod/tgsapi/pages/admin.php"), 'admin', 'z');
+function tgsapi_adminmenu() {
+	if (elgg_in_context('admin')) {
+		elgg_register_admin_menu_item('administer', 'tokens', 'tgsapi');
 	}
 }
-
-	// require models
-    require_once 'models/auth.php';
-    require_once 'models/activity.php';
-    require_once 'models/comment.php';
-    require_once 'models/photo.php';
-    require_once 'models/album.php';
-    require_once 'models/profile.php';
-    require_once 'models/wire.php';
-	require_once 'models/video.php';
-	require_once 'models/location.php';
-	require_once 'models/stats.php';
-	require_once 'models/todo.php';
-
-?>

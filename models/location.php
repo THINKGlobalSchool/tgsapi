@@ -34,5 +34,3 @@ function track_location($lat, $long) {
 	
     return true;
 }
-
-?>

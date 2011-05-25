@@ -30,5 +30,3 @@ function get_albums_list($user_id = null) {
 	return $data;
 
 }
-
-?>

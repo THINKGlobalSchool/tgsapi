@@ -65,7 +65,6 @@ function find_or_create_mobile_album() {
  * There were some issues with using not required params in elgg expose_function, so we'll get them
  * directly from input (using get_input() function)
  *
- * @global stdClass $CONFIG
  * @param string $title photo's title
  * @param string $caption photo's caption
  * @param string $tags tags (comma separated)
@@ -75,8 +74,6 @@ function find_or_create_mobile_album() {
  * @return true|string true on success and string (message) on error
  */
 function photo_add($title, $caption = '', $tags = '', $album_id, $lat, $long) {
-    global $CONFIG;
-
 	// if there are no files, return error message
     if (count($_FILES) == 0) {
         return 'no files';
@@ -113,7 +110,7 @@ function photo_add($title, $caption = '', $tags = '', $album_id, $lat, $long) {
     $not_forward = true;
 
 	// make upload
-    require_once ($CONFIG->pluginspath . "tidypics/actions/upload.php");
+    require_once (elgg_get_plugins_path() . "tidypics/actions/upload.php");
 
 	// now we should emulate edit details screen
 	// set up another REQUEST params
@@ -126,7 +123,7 @@ function photo_add($title, $caption = '', $tags = '', $album_id, $lat, $long) {
     $_REQUEST['container_guid'] = $album_id;
 
 	// set params to the posted photo
-    require_once ($CONFIG->pluginspath . "tidypics/actions/edit_multi.php");
+    require_once (elgg_get_plugins_path() . "tidypics/actions/edit_multi.php");
 
     // set geotag
     $entity = get_last_user_entities('image');
@@ -140,13 +137,10 @@ function photo_add($title, $caption = '', $tags = '', $album_id, $lat, $long) {
 /**
  * Get the list of photos in given album represented by it's guid
  *
- * @global stdClass $CONFIG
  * @param int $album_guid
  * @return array
  */
 function get_photos_list_in_album($album_guid) {
-    global $CONFIG;
-
 	// fetch images
 	// album is their container
     $images = elgg_get_entities(array('types' => 'object', 'subtypes' => 'image', 'container_guids' => $album_guid, 'limit' => 999));
@@ -162,7 +156,7 @@ function get_photos_list_in_album($album_guid) {
             $tmp_data['title'] = $image->title;
             $tmp_data['description'] = $image->description;
             $tmp_data['time_created'] = $image->time_created;
-            $tmp_data['image_url'] =  $CONFIG->wwwroot.'pg/photos/thumbnail/'.(int)$image->guid.'/large';
+            $tmp_data['image_url'] =  elgg_get_site_url().'pg/photos/thumbnail/'.(int)$image->guid.'/large';
 
             $data[] = $tmp_data;
         }
@@ -173,4 +167,3 @@ function get_photos_list_in_album($album_guid) {
 
     return $data;
 }
-?>

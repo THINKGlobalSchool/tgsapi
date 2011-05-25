@@ -46,4 +46,3 @@ function profile_details($user_id, $limit = 5, $offset = 0) {
     
     return $profile;
 }
-?>
