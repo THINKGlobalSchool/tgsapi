@@ -98,9 +98,9 @@ function activity_details($activity) {
             break;
 
         case 'site_activity':
-            $text = 'Added a new site';
-            $brief_desc = 'Added a new site';
-			$standart_data['url'] = get_pure_url($object_details['text'], false);
+            $activity_text = str_replace($user_data['author'].' ', '' ,$object_details['text']);
+            $text = $brief_desc = $activity_text;
+            $standart_data['url'] = get_pure_url($object_details['text'], false);
             break;
 
         case 'album':

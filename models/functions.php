@@ -632,7 +632,12 @@ function get_todo_entities_ordered_by_date_due($user_id, $completed, $limit, $of
 
 		// not just count todos
 		if (!$only_counter) {
-			$is_completed = have_assignees_completed_todo($todo->guid);
+			if ($user_role == 'assignee') {
+				$is_completed = has_user_submitted($user_id, $todo->guid);
+			} else {
+				$is_completed = have_assignees_completed_todo($todo->guid);
+			}
+		
 
 			// if todo status eqv to needed push it
 			if ($completed && $is_completed || !$completed && !$is_completed) {
