@@ -16,8 +16,29 @@ function activity_list($limit = 10, $offset = 0) {
 	// we do not use elgg methods to get activities because they do not support exclusion of unwanted activity types
 	// so the limit-offset feature could not be implemented or it will cause serious performance problems
 	// (if we'll fetch all activities and exclude unwanted in a cycle)
-    $activities = get_activities($known_types, 'comment', $limit, $offset);
-    $data = array();
+    //$activities = get_activities($known_types, 'comment', $limit, $offset);
+    
+	foreach ($known_types as $subtype) {
+		$subtype = sanitise_string($subtype);
+		$wheres[] = "(rv.subtype = '$subtype')";
+	}
+
+	if (is_array($wheres) && count($wheres)) {
+		$wheres = array(implode(' OR ', $wheres));
+	}
+	
+	$wheres[0] = "({$wheres[0]})";
+		
+	$options = array(
+		'action_types' => array('create'),
+		'limit' => $limit,
+		'offset' => $offset,
+		'wheres' => $wheres,
+	);
+	
+	$activities = elgg_get_river($options);
+			
+	$data = array();
 
 	/// push activity details to the list
     foreach ($activities as $activity) {
@@ -34,25 +55,31 @@ function activity_list($limit = 10, $offset = 0) {
  * @return array
  */
 function activity_details($activity) {
+
     if (!is_object($activity) ) {
         return 'NO ACTIVITY';
     }
+
+	$access_status = access_get_show_hidden_status();
+	access_show_hidden_entities(true);
 
 	// get needed in future params
     $object_id = (int) $activity->object_guid;
     $user_id = (int) $activity->subject_guid;
     $entity = get_entity($object_id);
 	$type = get_activity_type($activity);
+	
+	access_show_hidden_entities($access_status);
 
 	// start of pushing data
-    $standart_data = array();
-    $standart_data['id'] = (int) $activity->id;
-    $standart_data['parent_id'] = $object_id;
-    $standart_data['type'] = $type;
-    $standart_data['category_icon_url'] = get_category_icon($type);
-    $standart_data['time_created'] = $entity->time_created;
-    $standart_data['comments_count'] = get_comments_count($object_id);
-    $standart_data['url'] = $entity->getURL();
+    $standard_data = array();
+    $standard_data['id'] = (int) $activity->id;
+    $standard_data['parent_id'] = $object_id;
+    $standard_data['type'] = $type;
+    $standard_data['category_icon_url'] = get_category_icon($type);
+    $standard_data['time_created'] = $entity->time_created;
+    $standard_data['comments_count'] = get_comments_count($object_id);
+    $standard_data['url'] = $entity->getURL();
 
 	// some other needed
     $user_data = get_user_details($user_id);
@@ -71,15 +98,15 @@ function activity_details($activity) {
 	// for some activities (i.e. image) we accumulate only some of the fields and return instantly
     switch ($type) {
         case 'image':
-            $data['id'] = $standart_data['id'];
-            $data['parent_id'] = $standart_data['parent_id'];
+            $data['id'] = $standard_data['id'];
+            $data['parent_id'] = $standard_data['parent_id'];
             $data['type'] = $type;
             $data['title'] = $entity->title;
             $data['brief_description'] = 'added the photo '. $entity->title .' to album '.$container->title;
             $data['description'] = $entity->description;
-            $data['time_created'] = $standart_data['time_created'];
+            $data['time_created'] = $standard_data['time_created'];
             $data['image_url'] =  elgg_get_site_url() . 'pg/photos/thumbnail/' . $entity->guid . '/large';
-            $data['comments_count'] = $standart_data['comments_count'];
+            $data['comments_count'] = $standard_data['comments_count'];
 
             $data = array_merge($data, $user_data);
 
@@ -91,13 +118,13 @@ function activity_details($activity) {
         case 'doc_activity':
 			$text = 'Added a new document';
 			$brief_desc = 'Added a new document';
-			$standart_data['url'] = get_pure_url($object_details['text'], false);
+			$standard_data['url'] = get_pure_url($object_details['text'], false);
             break;
 
         case 'site_activity':
             $activity_text = str_replace($user_data['author'].' ', '' ,$object_details['text']);
             $text = $brief_desc = $activity_text;
-            $standart_data['url'] = get_pure_url($object_details['text'], false);
+            $standard_data['url'] = get_pure_url($object_details['text'], false);
             break;
 
         case 'album':
@@ -110,7 +137,7 @@ function activity_details($activity) {
                 $album_cover = elgg_get_site_url() . 'mod/tidypics/graphics/image_error_small.png';
             }
 
-            $standart_data['image_url'] =  $album_cover;
+            $standard_data['image_url'] =  $album_cover;
             $brief_desc = 'created a new photo album "'. $entity->title . '"';
 
             unset($object_details['new_album']);
@@ -119,7 +146,7 @@ function activity_details($activity) {
         case 'blog':
             $text = 'wrote a new blog post "'. $entity->title . '"';
             $brief_desc = 'wrote a new blog post "'. $entity->title . '"';
-//            $standart_data['excerpt'] = $object_details['excerpt'];
+//            $standard_data['excerpt'] = $object_details['excerpt'];
             break;
 
 		case 'tidypics_batch':
@@ -138,13 +165,13 @@ function activity_details($activity) {
 
 			$images_count = count($images);
 
-			$data['id'] = $standart_data['id'];
-			$data['parent_id'] = $standart_data['parent_id'];
+			$data['id'] = $standard_data['id'];
+			$data['parent_id'] = $standard_data['parent_id'];
 			$data['type'] = $type;
 			$data['description'] = 'added ' . $images_count . ' photo' . ($images_count > 1 ? 's' : '') . ' to album ' . $container->title;
 			$data['brief_description'] = $data['description'];
-			$data['time_created'] = $standart_data['time_created'];
-			$data['comments_count'] = $standart_data['comments_count'];
+			$data['time_created'] = $standard_data['time_created'];
+			$data['comments_count'] = $standard_data['comments_count'];
 
 			$data = array_merge($data, $user_data);
 
@@ -177,7 +204,7 @@ function activity_details($activity) {
 			break;
 
         case 'document':
-            $text = $standart_data['url'];
+            $text = $standard_data['url'];
             $brief_desc = 'uploaded "'. $entity->title . '"';
             break;
 
@@ -191,14 +218,17 @@ function activity_details($activity) {
             break;
 
         case 'groupforumtopic':
-            $text = 'Discussion topic: ' . $entity->title . "\n" . $standart_data['url'];
+            $text = 'Discussion topic: ' . $entity->title . "\n" . $standard_data['url'];
             $brief_desc = 'has started a new discussion topic titled "'. $entity->title .'" in the group '. $container->name;
             break;
 
         case 'todo':
+			$access_status = access_get_show_hidden_status();
+			access_show_hidden_entities(true);
             $text = 'created a To Do titled '. $entity->title;
             $brief_desc = 'created a To Do titled "'. $entity->title . '"';
-			$standart_data['todo_guid'] = $object_id;
+			$standard_data['todo_guid'] = $object_id;
+			access_show_hidden_entities($access_status);
             break;
 
         case 'bookmarks':
@@ -211,7 +241,7 @@ function activity_details($activity) {
             $brief_desc = 'is now a member of the group '.  $entity->name;
 
             $object_details = array();
-            unset($standart_data['parent_id']);
+            unset($standard_data['parent_id']);
 
             break;
 
@@ -221,9 +251,12 @@ function activity_details($activity) {
             break;
 
         case 'todosubmission':
+			$access_status = access_get_show_hidden_status();
+			access_show_hidden_entities(true);
             $todo_entity = get_entity($object_details['todo_guid']);
             $text = 'completed a To Do titled "'.  $todo_entity->title . '"';
             $brief_desc = 'completed a To Do titled "'.  $todo_entity->title . '"';
+			access_show_hidden_entities($access_status);
             break;
 
         case 'file':
@@ -236,7 +269,7 @@ function activity_details($activity) {
             $brief_desc = 'joined the site';
 
             $object_details = array();
-            unset($standart_data['parent_id']);
+            unset($standard_data['parent_id']);
 
             break;
 
@@ -247,12 +280,12 @@ function activity_details($activity) {
     }
 
 	// set descriptions
-    $standart_data['description'] = ucfirst(trim($text));
-    $standart_data['brief_description'] = ucfirst(trim($brief_desc));
+    $standard_data['description'] = ucfirst(trim($text));
+    $standard_data['brief_description'] = ucfirst(trim($brief_desc));
 
 	// sanitise arrays
     html_entity_decode_recursive($object_details);
-    html_entity_decode_recursive($standart_data);
+    html_entity_decode_recursive($standard_data);
 
-    return array_merge($standart_data, $object_details, $user_data);
+    return array_merge($standard_data, $object_details, $user_data);
 }

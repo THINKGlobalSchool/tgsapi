@@ -46,7 +46,13 @@ function comment_post($activity_id, $text) {
  */
 function comments_list($object_id, $limit = 10, $offset = 0) {
 	// fetch comments
-    $comments = get_annotations($object_id, "", "", 'generic_comment', "", "", $limit, $offset, 'time_created desc');
+    $comments = elgg_get_annotations(array(
+		'guid' => $object_id, 
+		'annotation_name' => 'generic_comment', 
+		'limit' => $limit, 
+		'offset' => $offset, 
+		'order_by' => 'n_table.time_created desc'
+	));
 
 	// push comments
     $i = 0;

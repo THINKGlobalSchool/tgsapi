@@ -29,7 +29,12 @@ function get_river_item($river_id) {
  * @return array
  */
 function get_object_details($entity_guid) {
-    $metadata = get_metadata_for_entity($entity_guid);
+    $metadata = elgg_get_metadata(array(
+		'guid' => $entity_guid,
+		'limit' => 0,
+	));
+	
+	$details = array();
 
     foreach($metadata as $v) {
         $name = get_metastring($v->name_id);
@@ -438,8 +443,13 @@ function get_user_guid_by_email($email) {
  * @return int
  */
 function get_comments_count($entity_guid) {
-	$comments = count_annotations($entity_guid, "", "", 'generic_comment');
-    return (int) $comments;
+	$comments = elgg_get_annotations(array(
+		'guid' => $entity_guid, 
+		'annotation_name' => 'generic_comment', 
+		'count' => TRUE,
+	));
+	
+    return (int)$comments;
 }
 
 /**
