@@ -60,7 +60,7 @@ function get_object_details($entity_guid) {
  * @param int $latest_activity_offset
  * @return array
  */
-function get_user_details ($user_id, $name = 'author', $full = true, $with_latest_activity = false, $latest_activity_limit = 5, $latest_activity_offset = 0) {
+function get_user_details($user_id, $name = 'author', $full = true, $with_latest_activity = false, $latest_activity_limit = 5, $latest_activity_offset = 0) {
 	require_once dirname(dirname(__FILE__)) .'/config.php';
 
     $user = get_user($user_id);
@@ -74,8 +74,29 @@ function get_user_details ($user_id, $name = 'author', $full = true, $with_lates
         $data['photo_url'] = $user->getIconURL('medium');
     }
 
-	if ($with_latest_activity) {
-		$user_activity = get_activities($known_types, 'comment', $latest_activity_limit, $latest_activity_offset, $user_id);
+	if ($with_latest_activity) {	
+		foreach ($known_types as $subtype) {
+			$subtype = sanitise_string($subtype);
+			$wheres[] = "(rv.subtype = '$subtype')";
+		}
+
+		if (is_array($wheres) && count($wheres)) {
+			$wheres = array(implode(' OR ', $wheres));
+		}
+
+		$wheres[0] = "({$wheres[0]})";
+		
+		// Get the users activity
+		$options = array(
+			'action_types' => array('create', 'comment'),
+			'subject_guids' => array($user_id),
+			'limit' => $latest_activity_limit,
+			'offset' => $latest_activity_offset,
+			'wheres' => $wheres,
+		);
+		
+		$user_activity = elgg_get_river($options);
+		
 		$latest = array();
 
 		/// push activity details to the list
@@ -674,60 +695,4 @@ function get_todo_entities_ordered_by_date_due($user_id, $completed, $limit, $of
 	} else {		
 		return $count;
 	}
-}
-
-/**
- * Retrieves handled items from the river
- *
- * @param string $subtypes The subtypes of entity to restrict to. Default: all
- * @param string $action_type The type of river action not to include. Default: none
- * @param int $limit The number of items to retrieve. Default: 10
- * @param int $offset The page offset. Default: 0
- * @param int $owner_id User id to restrict activity by user
- * @return array|false Depending on success
- */
-function get_activities($subtypes = '', $action_type = '', $limit = 10, $offset = 0, $owner_id = 0, $parent_id = '') {
-	global $CONFIG;
-
-	$limit = (int) $limit;
-	$offset = (int) $offset;
-	$owner_id = (int) $owner_id;
-
-	// Construct 'where' clauses for the river
-	$where = array();
-	// river table does not have columns expected by get_access_sql_suffix so we modify its output
-	$where[] = str_replace("and enabled='yes'",'',str_replace('owner_guid','subject_guid',get_access_sql_suffix_new('er','e')));
-
-	// get activities of known subtypes only
-	if (is_array($subtypes)) {
-		$where[] = " er.subtype in ('" . implode("','",$subtypes) . "') ";
-	} else if($subtypes) {
-		$where[] = " er.subtype = '{$subtypes}' ";
-	}
-
-	// exclude unhandled action types
-	if (!empty($action_type)) {
-		$where[] = " action_type != '{$action_type}' ";
-	}
-
-	// restrict by user
-	if ($owner_id) {
-		$where[] = " er.subject_guid = {$owner_id} ";
-	}
-
-	// restrict by parent_id
-	if ($parent_id) {
-		$where[] = " er.object_guid  = {$parent_id} ";
-	}
-
-	$whereclause = implode(' and ', $where);
-
-	// Construct main SQL
-	$sql = "select er.*" .
-			" from {$CONFIG->dbprefix}river er, {$CONFIG->dbprefix}entities e " .
-			" where {$whereclause} AND er.object_guid = e.guid GROUP BY object_guid " .
-			" ORDER BY e.last_action desc LIMIT {$offset},{$limit}";
-
-	// Get data
-	return get_data($sql);
 }

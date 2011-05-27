@@ -63,7 +63,16 @@ function get_todo_details($todo) {
 	// start of return accumulating
 	$data['id'] = (int) $todo->guid;
 
-	$activity = get_activities('todo', '', 1, 0, '', (int)$todo->guid);	
+	// Get the todo's river data (not sure why we do it this way..)
+	$options = array(
+		'subtypes' => array('todo'),
+		'object_guids' => array($todo->guid),
+		'limit' => 1,
+		'offset' => 0,
+	);
+
+	$activity = elgg_get_river($options);
+	
 	$data['activity_id'] = $activity[0]->id;
 	$data['status'] = $status;
 	$data['title'] = $todo->title;
@@ -113,8 +122,11 @@ function get_todo_details($todo) {
 	// get metadata
 	$todo_meta = get_object_details($todo->guid);
 
+	// If we've got tags
+	if ($todo_meta['tags']) {
+		$data['tags'] = @$todo_meta['tags'];
+	}
 	
-	$data['tags'] = @$todo_meta['tags'];
 	$data['return_required'] = isset($todo_meta['return_required']) && $todo_meta['return_required'] ? true : false;
 
 	// not to have tags without closures
@@ -205,6 +217,7 @@ function todo_show($todo_id) {
  * @return bool
  */
 function todo_complete($todo_guid) {
+	
 
 	$todo = get_entity($todo_guid);
 	$current_user_id = elgg_get_logged_in_user_guid();
@@ -236,18 +249,15 @@ function todo_complete($todo_guid) {
 
 		$user = get_user($current_user_id);
 		notify_user($todo->owner_guid,
-			$CONFIG->site->guid,
+			elgg_get_site_entity()->guid,
 			elgg_echo('todo:email:subjectsubmission'),
 			sprintf(elgg_echo('todo:email:bodysubmission'),
 			$user->name,
 			$todo->title,
 			$todo->getURL())
 		);
-
-
 		return true;
 	}
-
 	return false;
 }
 

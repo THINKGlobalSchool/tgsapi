@@ -12,11 +12,6 @@ require_once 'functions.php';
  */
 function activity_list($limit = 10, $offset = 0) {
     require_once dirname(dirname(__FILE__)) .'/config.php';
-
-	// we do not use elgg methods to get activities because they do not support exclusion of unwanted activity types
-	// so the limit-offset feature could not be implemented or it will cause serious performance problems
-	// (if we'll fetch all activities and exclude unwanted in a cycle)
-    //$activities = get_activities($known_types, 'comment', $limit, $offset);
     
 	foreach ($known_types as $subtype) {
 		$subtype = sanitise_string($subtype);

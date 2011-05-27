@@ -22,7 +22,7 @@ function profile_details($user_id, $limit = 5, $offset = 0) {
 
 	// get details
     global $CONFIG;
-    foreach($CONFIG->profile as $shortname => $valtype) {
+    foreach($CONFIG->profile_fields as $shortname => $valtype) {
         if (!empty($details[$shortname])) {
 			$real_details[$shortname] = $details[$shortname];
         }
