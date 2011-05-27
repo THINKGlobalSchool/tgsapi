@@ -10,7 +10,7 @@ require_once 'functions.php';
  */
 function find_or_create_mobile_album() {
     // Get user's albums
-    $albums = elgg_get_entities(array('types' => 'object', 'subtypes' => 'album', 'container_guids' => get_loggedin_userid(), 'limit' => $number));
+    $albums = elgg_get_entities(array('types' => 'object', 'subtypes' => 'album', 'container_guids' => elgg_get_logged_in_user_guid(), 'limit' => $number));
 
     $found = false;
     $album_id = null;
@@ -35,8 +35,8 @@ function find_or_create_mobile_album() {
         $album->subtype = "album";
 
         // Set its owner to the current user
-        $album->container_guid = get_loggedin_userid();
-        $album->owner_guid = get_loggedin_userid();
+        $album->container_guid = elgg_get_logged_in_user_guid();
+        $album->owner_guid = elgg_get_logged_in_user_guid();
         $album->access_id = ACCESS_LOGGED_IN;
         // Set its title and description appropriately
         $album->title = MOBILE_ALBUM;

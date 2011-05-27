@@ -26,7 +26,7 @@ function comment_post($activity_id, $text) {
     }
 
 	// create comment
-    $user = get_loggedin_user();
+    $user = elgg_get_logged_in_user_entity();
     $res = create_annotation($object_id, 'generic_comment', $text, '', $user->guid, ACCESS_LOGGED_IN);
 
     if ($res) {

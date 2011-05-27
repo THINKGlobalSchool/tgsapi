@@ -69,9 +69,9 @@ function get_user_details ($user_id, $name = 'author', $full = true, $with_lates
     if ($full) {
         $data[$name.'_id'] = (int)$user_id;
         $data[$name] = $user->name;
-        $data[$name.'_photo_url'] = $user->getIcon('medium');
+        $data[$name.'_photo_url'] = $user->getIconURL('medium');
     } else {
-        $data['photo_url'] = $user->getIcon('medium');
+        $data['photo_url'] = $user->getIconURL('medium');
     }
 
 	if ($with_latest_activity) {
@@ -97,7 +97,7 @@ function get_user_details ($user_id, $name = 'author', $full = true, $with_lates
  */
 function get_user_avatar($user_id) {
     $user = get_user($user_id);
-    return  $user->getIcon('medium');
+    return  $user->getIconURL('medium');
 }
 
 /**
@@ -171,7 +171,7 @@ function get_last_user_entities($subtype) {
 	$e = elgg_get_entities(array(
 		'type' => 'object',
 		'subtype' => $subtype,
-		'owner_guid' => get_loggedin_userid(),
+		'owner_guid' => elgg_get_logged_in_user_guid(),
 		'limit' => 1
 	));
 
@@ -193,7 +193,7 @@ function get_last_user_entities($subtype) {
  */
 function entity_set_lat_long(&$entity, $lat, $long) {   
     if (empty($lat) || empty($long)) {
-        $user = get_object_details(get_loggedin_user());
+        $user = get_object_details(elgg_get_logged_in_user_entity());
         $lat = $user['current_latitude'];
         $long = $user['current_longitude'];
     }

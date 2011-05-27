@@ -1,7 +1,7 @@
 <?php
 
 // non-commentable activity types
-   $not_commentable = array('doc_activity', 'site_activity');
+   $not_commentable = array('shared_doc', 'site_activity');
 // not shown activity types
    $not_shown = array( 'messages', 'pages_welcome', 'plugin', 'resourcerequest', 'resourcerequesttype', 'shared_access', 'site', 'widget', 'googleapps');
 
@@ -13,7 +13,7 @@ $video_extensions = array('mpg', 'mpeg','avi','mp4', 'wmv', 'mov');
 // known activity types
 $known_types = array(
 	'image',
-	'doc_activity',
+	'shared_doc',
 	'site_activity',
 	'album',
 	'blog',
@@ -31,3 +31,4 @@ $known_types = array(
 	'file',
 	'user'
 );
+

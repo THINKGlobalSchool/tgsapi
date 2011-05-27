@@ -24,7 +24,7 @@ function video_add($title, $caption = '', $tags = '', $lat, $long) {
         return 'no files';
     }
 
-    $username = get_loggedin_user()->username;
+    $username = elgg_get_logged_in_user_entity()->username;
     $uploaddir = elgg_get_data_path() . 'tmp_videos/';
 
     foreach($_FILES as $file) {

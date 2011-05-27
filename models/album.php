@@ -11,7 +11,7 @@ function get_albums_list($user_id = null) {
 
 	// by default use logged in user
 	if(empty($user_id)) {
-		$user = get_loggedin_user();
+		$user = elgg_get_logged_in_user_entity();
 		$user_id = $user->guid;
 
 	}

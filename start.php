@@ -33,8 +33,7 @@ elgg_register_event_handler('init', 'system', 'tgsapi_init');
  * To register new function add expose_function definition
  *
  */
-function tgsapi_init() {
-		
+function tgsapi_init() {		
 	// Get the authentification token
 	expose_function("auth.get_infinity_token", "auth_get_infinity_token", array(
 			'username' => array ('type' => 'string'),

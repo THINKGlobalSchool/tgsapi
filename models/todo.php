@@ -14,7 +14,7 @@ require_once 'functions.php';
  */
 function todo_list($status = 'incompleted', $limit = 10, $offset = 0, $user_role = 'all') {
 	// get user id
-	$current_user_id = get_loggedin_userid();
+	$current_user_id = elgg_get_logged_in_user_guid();
 	// cast completement status to bool
 	$completed = ($status == 'completed' ? true : false);
 
@@ -39,7 +39,7 @@ function todo_list($status = 'incompleted', $limit = 10, $offset = 0, $user_role
  */
 function get_todo_details($todo) {
 	$data = array();
-	$current_user_id = get_loggedin_userid();
+	$current_user_id = elgg_get_logged_in_user_guid();
 	// todo assigner
 	$owner = $todo->getOwnerEntity();
 
@@ -150,7 +150,7 @@ function todo_accept($todo_id) {
 		return false;
 	}
 
-	$current_user_id = get_loggedin_userid();
+	$current_user_id = elgg_get_logged_in_user_guid();
 	$accepted = user_accept_todo($current_user_id, $todo->guid);
 
 	return ($accepted ? true : false);
@@ -168,7 +168,7 @@ function todo_accept($todo_id) {
  */
 function get_todos_count($status = 'unaccepted', $user_role = 'assignee') {
 	// get user id
-	$current_user_id = get_loggedin_userid();
+	$current_user_id = elgg_get_logged_in_user_guid();
 
 	$count = get_todo_entities_ordered_by_date_due($current_user_id, '',  '', '', $user_role, true, $status);
 
@@ -207,7 +207,7 @@ function todo_show($todo_id) {
 function todo_complete($todo_guid) {
 
 	$todo = get_entity($todo_guid);
-	$current_user_id = get_loggedin_userid();
+	$current_user_id = elgg_get_logged_in_user_guid();
 
 	if ($todo && $todo->getSubtype() == "todo") {
 

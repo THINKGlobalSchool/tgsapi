@@ -115,10 +115,10 @@ function activity_details($activity) {
             return $data;
             break;
 
-        case 'doc_activity':
-			$text = 'Added a new document';
-			$brief_desc = 'Added a new document';
-			$standard_data['url'] = get_pure_url($object_details['text'], false);
+        case 'shared_doc':
+			$text = 'Added a new document titled ' . $object_details['trunc_title'] ;
+			$brief_desc = 'Added a new document titled ' . $object_details['trunc_title'];
+			$standard_data['url'] = get_pure_url($object_details['href'], false);
             break;
 
         case 'site_activity':
