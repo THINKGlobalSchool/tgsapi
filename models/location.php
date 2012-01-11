@@ -22,7 +22,10 @@ function track_location($lat, $long) {
 	// find each metadata
 	// if there is no, create it
 	foreach($metadata as $name => $value) {
-		$entry = get_metadata_byname($user_id, $name);
+		$entry = elgg_get_metadata(array(
+			'guid' => $user_id, 
+			'metadata_name' => $name
+		));
 
 		if (!$entry) {
 			create_metadata($user_id, $name, $value, '', 0);

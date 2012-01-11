@@ -47,7 +47,7 @@ function find_or_create_mobile_album() {
 
         // Before we can set metadata, we need to save the album
         $album_id = $album->save();
-        trigger_elgg_event('add', 'tp_album', $album);
+        elgg_trigger_event('add', 'tp_album', $album);
         return $album_id;
     }
 }
