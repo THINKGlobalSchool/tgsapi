@@ -73,7 +73,7 @@ function activity_details($activity) {
     $standard_data['type'] = $type;
     $standard_data['category_icon_url'] = get_category_icon($type);
     $standard_data['time_created'] = $entity->time_created;
-    $standard_data['comments_count'] = get_comments_count($object_id);
+    $standard_data['comments_count'] = $entity->countComments();
     $standard_data['url'] = $entity->getURL();
 
 	// some other needed
@@ -255,8 +255,8 @@ function activity_details($activity) {
             break;
 
         case 'file':
-            $text = 'uploaded file "'.  $entity->name . '"';
-            $brief_desc = 'uploaded file "'.  $entity->name . '"';
+            $text = 'uploaded file "'.  $entity->title . '"';
+            $brief_desc = 'uploaded file "'.  $entity->title . '"';
             break;
 
         case 'user':

@@ -111,17 +111,6 @@ function get_user_details($user_id, $name = 'author', $full = true, $with_latest
 }
 
 /**
- * Get user's avatar url
- *
- * @param int $user_id
- * @return string
- */
-function get_user_avatar($user_id) {
-    $user = get_user($user_id);
-    return  $user->getIconURL('medium');
-}
-
-/**
  * Get the path for icon of given activity type
  *
  * @param string $subtype
@@ -214,15 +203,18 @@ function get_last_user_entities($subtype) {
  */
 function entity_set_lat_long(&$entity, $lat, $long) {   
     if (empty($lat) || empty($long)) {
-        $user = get_object_details(elgg_get_logged_in_user_entity());
-        $lat = $user['current_latitude'];
-        $long = $user['current_longitude'];
+        $user = get_object_details(elgg_get_logged_in_user_guid());
+		if ($user['current_latitude'] && $user['current_longitude']) {
+			$lat = $user['current_latitude'];
+	        $long = $user['current_longitude'];
+		}
     }
     $entity->setLatLong($lat, $long);
 }
 
 /**
  * Rotates image based on exif info
+ * - Not in use?
  *
  * @param string $filename
  */
@@ -275,23 +267,8 @@ function rotate_image_if_need($filename) {
 }
 
 /**
- * Used for nice view of print_r
- *
- * @param mixed $var data to print
- * @param bool $do_exit to die or not to die after the print
- */
-function print_var($var, $do_exit = false) {
-    echo '<pre>';
-    print_r($var);
-    echo '</pre>';
-
-	if ($do_exit) {
-		die;
-	}
-}
-
-/**
  * Image class used for working with rotation of photo
+ * - Only used by above function.. (so nowhere)
  */
 class Image {
 	/**
@@ -437,43 +414,6 @@ function get_user_guid_if_exists($username, $password) {
 }
 
 /**
- * Get the guid of user with given email
- *
- * @global stdClass $CONFIG
- * @param string $email
- * @return int|false user guid or false if there is no such user entity
- */
-function get_user_guid_by_email($email) {
-	global $CONFIG;
-
-    $email = mysql_real_escape_string($email);
-    $q = "SELECT u.guid FROM {$CONFIG->dbprefix}users_entity u WHERE u.email = '" . $email . "'";
-    $data = get_data($q);
-
-    if ($data) {
-        return $data[0]->guid;
-    }
-
-    return false;
-}
-
-/**
- * Get the number of comment to given entity
- *
- * @param int $entity_guid
- * @return int
- */
-function get_comments_count($entity_guid) {
-	$comments = elgg_get_annotations(array(
-		'guid' => $entity_guid, 
-		'annotation_name' => 'generic_comment', 
-		'count' => TRUE,
-	));
-	
-    return (int)$comments;
-}
-
-/**
  * Returns href url from <a> tag
  *
  * @param string $href tag
@@ -537,7 +477,7 @@ function gps2Num($coordPart) {
  * @param string $password
  * @return bool
  */
-function is_authetificated_on_google($username, $password) {
+function is_authenticated_on_google($username, $password) {
 	$source = 'tgs_elgg';
 	$service = 'xapi';
 
@@ -566,133 +506,4 @@ function is_authetificated_on_google($username, $password) {
     }
 
 	return true;
-}
-
-/**
- * Get todos list for given user of given completement status restricted by limit-offset
- *
- * @param int $user_id
- * @param bool $completed true - completed, otherwise - false
- * @param int $limit
- * @param int $offset
- * @return array
- */
-function get_todo_entities_ordered_by_date_due($user_id, $completed, $limit, $offset, $user_role = 'all', $only_counter = false, $status = 'unaccepted') {
-
-	// values used in query
-	$my_offset = 0;
-	$my_limit = 9999;
-
-	// get some values needed for query
-	// subtype id of todo
-	$subtype_id = get_subtype_id('object', 'todo');
-	// metastring id of 'status' - publishing status
-	$status_meta_id = get_metastring_id('status');
-	// metastring if of '1'
-	$published_meta_id = get_metastring_id('1');
-	// metastring id of 'due_date'
-	$date_due_meta_id = get_metastring_id('due_date');
-
-
-	// User limitations (assigner, assignee or both)
-	switch ($user_role) {
-		case 1:
-		case 'assigner':			
-			$user_limitation = "e.owner_guid = " . $user_id;
-			break;
-		case 2:
-		case 'assignee':
-			$user_limitation = "						
-							(r.guid_one = " . $user_id . ") and
-							(r.relationship like 'assignedtodo')";
-			break;		
-		default:
-			$user_limitation = "
-						e.owner_guid = " . $user_id . " or
-						(
-							(r.guid_one = " . $user_id . ") and
-							(r.relationship like 'assignedtodo')
-						)";
-	}
-
-	// get todos where user is assigner or assignee
-	$query = "	select
-					e.*,
-					(
-						select
-							ms_d.string
-						from
-							elgg_metadata md_d left join
-							elgg_metastrings ms_d on md_d.value_id = ms_d.id
-						where
-							md_d.entity_guid = e.guid and
-							md_d.name_id = " . $date_due_meta_id . "
-					) as due_date
-				from
-					elgg_entities e left join
-					elgg_entity_relationships r on e.guid = r.guid_two left join
-					elgg_metadata md on e.guid = md.entity_guid
-				where
-					e.type = 'object' and
-					e.subtype = '" . $subtype_id . "' and
-					e.enabled = 'yes' and
-					(
-						". $user_limitation ."
-					) and
-					(
-						md.name_id = " . $status_meta_id . " and
-						md.value_id = " . $published_meta_id . "
-					)
-				group by
-					e.guid
-				order by
-					due_date
-				limit " . $my_offset . "," . $my_limit;
-
-
-	$dt = get_data($query, "entity_row_to_elggstar");
-
-	// then get todos in needed quantity of needed completement status
-	$data = array();
-	$idx = 0;
-
-	$count = 0;
-	foreach ($dt as $todo) {
-
-		// not just count todos
-		if (!$only_counter) {
-			if ($user_role == 'assignee') {
-				$is_completed = has_user_submitted($user_id, $todo->guid);
-			} else {
-				$is_completed = have_assignees_completed_todo($todo->guid);
-			}
-		
-
-			// if todo status eqv to needed push it
-			if ($completed && $is_completed || !$completed && !$is_completed) {
-				$data[] = $todo;
-
-				if (++$idx == ($limit + $offset)) {
-					break;
-				}
-			}
-
-		// just count {status} todos
-		} else {
-			$is_accepted = has_user_accepted_todo($user_id, $todo->guid);
-			if ($is_accepted && $status == 'accepted') {
-				$count++;
-			} elseif(!$is_accepted && $status == 'unaccepted') {
-				$count++;
-			}
-		}
-	}
-
-	if (!$only_counter) {
-		// remove not needed values from the start of array
-		$data = array_slice($data, $offset, $limit);
-		return $data;
-	} else {		
-		return $count;
-	}
 }

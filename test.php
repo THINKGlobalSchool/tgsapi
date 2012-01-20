@@ -8,24 +8,22 @@
 require_once("../../engine/start.php");
 
 	// define environments
-	$env = @$_GET['env'];
+	$env = get_input('env');
 	switch (@$env) {
-		case 'loc':
-			$site = 'http://elgg.leonid2.tsweb.toa/';
-			$token = auth_get_infinity_token('admin', '123456');
-			break;
-                case 'mig':
-			$site = 'http://spotmigration.thinkglobalschool.com/';
-			$token = auth_get_infinity_token('testuser1', 'user1pass');
-			break;
-		case 'dev':
+		case 'local':
 		default:
-			$site = 'http://spotsvn.thinkglobalschool.com/';
-			$token = '9adcc1176baeae91d8143c6e87d10aae';
+			$site = 'http://localhost/elgg/';
+			$token = auth_get_infinity_token('jtilson', 'jtilson');
+			$user_guid = get_user_by_username('jtilson')->guid;
+			break;
+		case 'spot18':
+			$site = 'http://spot18.thinkglobalschool.com/';
+			$token = auth_get_infinity_token('testuser1', 'user1pass');
+			$user_guid = get_user_by_username('testuser1')->guid;
 			break;
 	}
 
-	echo "site=".$site;
+	echo $site;
 	echo "<br /> token = ".$token;
 
 ?>
@@ -34,9 +32,7 @@ require_once("../../engine/start.php");
 	<hr/>
 	<a href="<?=$site?>services/api/rest/xml/?method=activity.list&limit=10&offset=0&auth_token=<?=$token?>">Activity list</a>
 	<hr />
-	<a href="<?=$site?>services/api/rest/xml/?method=activity.show&activity_id=57&auth_token=<?=$token?>">Activity details</a>
-	<hr />
-	<a href="<?=$site?>services/api/rest/xml/?method=profile.show&user_id=2&limit=10&offset=0&auth_token=<?=$token?>">user profile</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=profile.show&user_id=<?php echo $user_guid; ?>&limit=10&offset=0&auth_token=<?=$token?>">user profile</a>
 	<hr />
 	<a href="<?=$site?>services/api/rest/xml/?method=comments.list&object_id=24&auth_token=<?=$token?>">Comment list for object</a>
 	<hr />

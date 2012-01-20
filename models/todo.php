@@ -12,15 +12,27 @@ require_once 'functions.php';
  * @param string @user_role  ('all', 'assigner', 'assignee')
  * @return array
  */
-function todo_list($status = 'incompleted', $limit = 10, $offset = 0, $user_role = 'all') {
+function todo_list($status = 'incomplete', $limit = 10, $offset = 0, $user_role = 'all') {
+	error_log($status);
 	// get user id
-	$current_user_id = elgg_get_logged_in_user_guid();
+	$user_id = elgg_get_logged_in_user_guid();
 	// cast completement status to bool
 	$completed = ($status == 'completed' ? true : false);
 
 	// we do not use elgg methods to get todo entities because they do not support filtering by wanted todo status
 	// so the limit-offset feature could not be implemented or it will cause serious performance problems
-	$todos = get_todo_entities_ordered_by_date_due($current_user_id, $completed, $limit, $offset, $user_role);
+	//$todos = get_todo_entities_ordered_by_date_due($user_id, $completed, $limit, $offset, $user_role);
+	
+	// Using TODO lib method :D:D:D
+	$options = array(
+		'container_guid' => $user_id,
+		'status' => $status,
+		'context' => $user_role,
+		'sort_order' => 'ASC',
+		'list' => FALSE,
+	);
+
+	$todos = get_todos($options);
 
 	// push todo details to the list
 	$data = array();
@@ -138,7 +150,7 @@ function get_todo_details($todo) {
 
 	$data['accepted_by_me'] = $accetted_by_me;
 	$data['completed_by_me'] = $completed_by_me;
-	$data['comments_count'] = (int) get_comments_count($todo->guid);
+	$data['comments_count'] = $todo->countComments();
 
 	// sanitise
 	html_entity_decode_recursive($data);
@@ -180,12 +192,9 @@ function todo_accept($todo_id) {
  */
 function get_todos_count($status = 'unaccepted', $user_role = 'assignee') {
 	// get user id
-	$current_user_id = elgg_get_logged_in_user_guid();
+	$user_id = elgg_get_logged_in_user_guid();
 
-	$count = get_todo_entities_ordered_by_date_due($current_user_id, '',  '', '', $user_role, true, $status);
-
-	return $count;
-	exit;
+	return count_unaccepted_todos($user_id);
 }
 
 
@@ -260,33 +269,3 @@ function todo_complete($todo_guid) {
 	}
 	return false;
 }
-
-/**
- * Set 'completed' for a user on given todo
- *
- * @param int $user_guid
- * @param int $todo_guid
- * @return bool
- */
-function todo_complete_all($todo_guid) {
-
-	$todo = get_entity($todo_guid);
-
-	if ($todo && $todo->getSubtype() == "todo") {
-		$todo->manual_complete = true;
-		if ($todo->save()) {
-			// Grab the todo's assignees and mark each as having accepted the todo
-			$assignees = get_todo_assignees($todo_guid);
-			foreach ($assignees as $assignee) {
-				user_accept_todo($assignee->getGUID(), $todo_guid);
-			}
-
-			// Success message
-			return true;
-		}
-	}
-
-	return false;
-}
-
-?>

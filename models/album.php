@@ -17,7 +17,7 @@ function get_albums_list($user_id = null) {
 	}
 
 	// fetch albums
-	$owner_albums = elgg_get_entities(array('types' => 'object', 'subtypes' => 'album', 'container_guids' => $user_id, 'limit' => 999));
+	$owner_albums = elgg_get_entities(array('types' => 'object', 'subtypes' => 'album', 'container_guids' => $user_id, 'limit' => 0));
 
 	// push data to returned array
 	$data = array();
@@ -28,5 +28,4 @@ function get_albums_list($user_id = null) {
 	}
 
 	return $data;
-
 }

@@ -59,7 +59,8 @@ function auth_get_infinity_token($username, $password) {
  */
 function auth_get_google_token($username, $password) {
 	// see if there is user with such username (email)
-	$guid = get_user_guid_by_email($username);
+	$user = get_user_by_email($username);
+	$guid = $user[0]->guid;
 
     // if user not exist throw auth failed
     if ($guid == false) {
@@ -67,7 +68,7 @@ function auth_get_google_token($username, $password) {
     }
 
 	// try to authentificate on google. On fault throw exception
-	if (!is_authetificated_on_google($username, $password)) {
+	if (!is_authenticated_on_google($username, $password)) {
 		throw new SecurityException(elgg_echo('SecurityException:authenticationfailed'));
 	}
 
