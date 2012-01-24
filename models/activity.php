@@ -59,9 +59,9 @@ function activity_details($activity) {
 	access_show_hidden_entities(true);
 
 	// get needed in future params
-    $object_id = (int) $activity->object_guid;
-    $user_id = (int) $activity->subject_guid;
-    $entity = get_entity($object_id);
+    $object_guid = (int) $activity->object_guid;
+    $user_guid = (int) $activity->subject_guid;
+    $entity = get_entity($object_guid);
 	$type = get_activity_type($activity);
 	
 	access_show_hidden_entities($access_status);
@@ -69,7 +69,7 @@ function activity_details($activity) {
 	// start of pushing data
     $standard_data = array();
     $standard_data['id'] = (int) $activity->id;
-    $standard_data['parent_id'] = $object_id;
+    $standard_data['parent_id'] = $object_guid;
     $standard_data['type'] = $type;
     $standard_data['category_icon_url'] = get_category_icon($type);
     $standard_data['time_created'] = $entity->time_created;
@@ -77,16 +77,16 @@ function activity_details($activity) {
     $standard_data['url'] = $entity->getURL();
 
 	// some other needed
-    $user_data = get_user_details($user_id);
-    $object_details = get_object_details($object_id);
+    $user_data = get_user_details($user_guid);
+    $object_details = get_object_details($object_guid);
 
 	// this types of activities are placed in container
     $in_container = array ('groupforumtopic', 'image', 'group', 'tidypics_batch');
 
     // Need to go to container
     if (in_array($type, $in_container)) {
-        $container_id = $entity->container_guid;
-        $container = get_entity($container_id);
+        $container_guid = $entity->container_guid;
+        $container = get_entity($container_guid);
     }
 
 	// set description and custom fields depending on activity type
@@ -222,7 +222,7 @@ function activity_details($activity) {
 			access_show_hidden_entities(true);
             $text = 'created a To Do titled '. $entity->title;
             $brief_desc = 'created a To Do titled "'. $entity->title . '"';
-			$standard_data['todo_guid'] = $object_id;
+			$standard_data['todo_guid'] = $object_guid;
 			access_show_hidden_entities($access_status);
             break;
 

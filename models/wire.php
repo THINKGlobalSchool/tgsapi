@@ -16,12 +16,12 @@ function api_post_to_wire($text, $lat = NULL, $long = NULL) {
 	$access = ACCESS_LOGGED_IN;
 	
 	// Elgg 1.8 requires the user_id now aswell
-	$user_id = elgg_get_logged_in_user_guid();
+	$user_guid = elgg_get_logged_in_user_guid();
 
 	// on production we use function tgswire_save_post()
 	// locally thewire_save_post() function is used
     //$ret_val = tgswire_save_post($text, $access, 0, "tgsapi");
-    $ret_val = thewire_save_post($text, $user_id, $access, 0, "tgsapi");
+    $ret_val = thewire_save_post($text, $user_guid, $access, 0, "tgsapi");
 
     // get the just created entity and set geolocation
     $entity = get_last_user_entities('thewire');

@@ -4,20 +4,20 @@
  * Get the list of user's albums.
  * Outer api function
  *
- * @param int $user_id
+ * @param int $user_guid
  * @return array
  */
-function get_albums_list($user_id = null) {
+function get_albums_list($user_guid = null) {
 
 	// by default use logged in user
-	if(empty($user_id)) {
+	if(empty($user_guid)) {
 		$user = elgg_get_logged_in_user_entity();
-		$user_id = $user->guid;
+		$user_guid = $user->guid;
 
 	}
 
 	// fetch albums
-	$owner_albums = elgg_get_entities(array('types' => 'object', 'subtypes' => 'album', 'container_guids' => $user_id, 'limit' => 0));
+	$owner_albums = elgg_get_entities(array('types' => 'object', 'subtypes' => 'album', 'container_guids' => $user_guid, 'limit' => 0));
 
 	// push data to returned array
 	$data = array();

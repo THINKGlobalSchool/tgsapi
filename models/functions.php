@@ -52,7 +52,7 @@ function get_object_details($entity_guid) {
 /**
  * Get details for user with given id
  *
- * @param int $user_id
+ * @param int $user_guid
  * @param string $name name of the user in the result array key names
  * @param bool $full get full data or restricted
  * @param bool $with_latest_activity whether include or not latest user activities
@@ -60,14 +60,14 @@ function get_object_details($entity_guid) {
  * @param int $latest_activity_offset
  * @return array
  */
-function get_user_details($user_id, $name = 'author', $full = true, $with_latest_activity = false, $latest_activity_limit = 5, $latest_activity_offset = 0) {
+function get_user_details($user_guid, $name = 'author', $full = true, $with_latest_activity = false, $latest_activity_limit = 5, $latest_activity_offset = 0) {
 	require_once dirname(dirname(__FILE__)) .'/config.php';
 
-    $user = get_user($user_id);
+    $user = get_user($user_guid);
 
     $data = array();
     if ($full) {
-        $data[$name.'_id'] = (int)$user_id;
+        $data[$name.'_id'] = (int)$user_guid;
         $data[$name] = $user->name;
         $data[$name.'_photo_url'] = $user->getIconURL('medium');
     } else {
@@ -89,7 +89,7 @@ function get_user_details($user_id, $name = 'author', $full = true, $with_latest
 		// Get the users activity
 		$options = array(
 			'action_types' => array('create', 'comment'),
-			'subject_guids' => array($user_id),
+			'subject_guids' => array($user_guid),
 			'limit' => $latest_activity_limit,
 			'offset' => $latest_activity_offset,
 			'wheres' => $wheres,
@@ -210,207 +210,6 @@ function entity_set_lat_long(&$entity, $lat, $long) {
 		}
     }
     $entity->setLatLong($lat, $long);
-}
-
-/**
- * Rotates image based on exif info
- * - Not in use?
- *
- * @param string $filename
- */
-function rotate_image_if_need($filename) {
-    $exif = exif_read_data($filename);
-    $ort = $exif['Orientation'];
-
-    $image = new Image($filename);
-
-    switch($ort)
-    {
-        case 1: // nothing
-        break;
-
-        case 2: // horizontal flip
-            $image->flip(MIRROR_HORIZONTAL);
-        break;
-
-        case 3: // 180 rotate left
-			$image->rotate();
-            $image->rotate();
-        break;
-
-        case 4: // vertical flip
-            $image->flip(MIRROR_VERTICAL);
-        break;
-
-        case 5: // vertical flip + 90 rotate right
-            $image->flip(MIRROR_VERTICAL);
-			$image->rotate();
-        break;
-
-        case 6: // 90 rotate right
-            $image->rotate();
-        break;
-
-        case 7: // horizontal flip + 90 rotate right
-            $image->flip(MIRROR_HORIZONTAL);
-            $image->rotate();
-        break;
-
-        case 8: // 90 rotate left
-            $image->rotate();
-			$image->rotate();
-			$image->rotate();
-        break;
-    }    
-
-
-}
-
-/**
- * Image class used for working with rotation of photo
- * - Only used by above function.. (so nowhere)
- */
-class Image {
-	/**
-	 * @var string img filename
-	 */
-    private $src;   
-
-	/**
-	 * Initialize class
-	 *
-	 * @param string $src
-	 */
-    function __construct($src) {
-        $this->src = $src;
-
-        define("MIRROR_HORIZONTAL", 1);
-        define("MIRROR_VERTICAL", 2);
-        define("MIRROR_BOTH", 3);
-    }
-
-	/**
-	 * Flips (mirrors) an image located in src
-	 *
-	 * Possible type values:
-	 * 1 - mirror horizontal
-	 * 2 - mirror vertical
-	 * 3 - mirror both horizontal and vertical
-	 *
-	 * @param int $type
-	 */
-    function flip($type) {
-		$source = imagecreatefromjpeg($this->src);
-		$width = imagesx($source);
-		$height = imagesy($source);
-		$imgdest = imagecreatetruecolor($width, $height);
-
-		for ($x=0 ; $x<$width ; $x++) {
-			for ($y=0 ; $y<$height ; $y++) {
-				switch ($type) {
-					case MIRROR_HORIZONTAL:
-						imagecopy($imgdest, $source, $width-$x-1, $y, $x, $y, 1, 1);
-						break;
-					case MIRROR_VERTICAL:
-						imagecopy($imgdest, $source, $x, $height-$y-1, $x, $y, 1, 1);
-						break;
-					case MIRROR_BOTH:
-						imagecopy($imgdest, $source, $width-$x-1, $height-$y-1, $x, $y, 1, 1);
-						break;
-				}
-			}
-		}
-
-		imagejpeg($imgdest, $this->src);
-
-		imagedestroy($source);
-		imagedestroy($imgdest);
-    }
-
-	/**
-	 * Rotates an image located in src 90CW
-	 *
-	 * @todo rewrite this method to support degrees.
-	 *
-	 * @param int $degrees
-	 */
-    function rotate($degrees) {
-		$source = imagecreatefromjpeg($this->src);
-		$width = imagesx($source);
-		$height = imagesy($source);
-
-        $result = @imagecreatetruecolor($height, $width);
-        if($result)
-        {
-        for ($i = 0; $i < $width; $i++)
-            for ($j = 0; $j < $height; $j++)
-            {
-                $ref = imagecolorat($source, $i, $j);
-                imagesetpixel($result, ($height - 1) - $j, $i, $ref);
-            }
-        }
-        imagejpeg($result, $this->src);
-
-        imagedestroy($source);
-        imagedestroy($result);
-    }
-}
-/**
- * Checks is user with given guid activated
- *
- * @global stdClass $CONFIG
- * @param int $guid
- * @return bool
- *
- * NOTE:  This function has been replaced by elgg_get_user_validation_status
- *
- */
-function is_user_activated($guid) {
-    global $CONFIG;
-
-	// active status is stored in metadata 'validated'
-    $q = 'SELECT count(md.id) as cnt
-            FROM elgg_metadata md
-                JOIN elgg_metastrings ms1 on md.name_id = ms1.id
-                JOIN elgg_metastrings ms2 on md.value_id = ms2.id
-            WHERE
-                ms1.string = "validated" AND
-                ms2.string = "1" AND
-                md.enabled = "yes" AND
-                md.entity_guid = ' . (int) $guid;
-
-    $data = get_data($q);
-
-    return  ((bool) $data[0]->cnt);
-}
-
-/**
- * Get the guid for user with provided username and pass
- *
- * @global stdClass $CONFIG
- * @param string $username
- * @param string $password
- * @return int|false user guid or false if there is no such user entity
- */
-function get_user_guid_if_exists($username, $password) {
-    global $CONFIG;
-
-	// password stored in db is a md5 hash of pure pass and salt, so we fetch salt by username first
-    $username = mysql_real_escape_string($username);
-    $q = "SELECT u.salt, u.guid FROM {$CONFIG->dbprefix}users_entity u WHERE u.username = '" . $username . "'";
-    $data = get_data($q);
-
-    if ($data) {
-        $password = md5($password . $data[0]->salt);
-        $q = "SELECT u.guid as guid FROM {$CONFIG->dbprefix}users_entity u WHERE u.guid = " . $data[0]->guid . " AND u.password = '" . $password . "'";
-        $guid_data = get_data($q);
-
-        if ($guid_data) {
-            return (int) $guid_data[0]->guid;
-        }
-    }
-
-    return false;
 }
 
 /**

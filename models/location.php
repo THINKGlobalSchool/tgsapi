@@ -11,7 +11,7 @@ function track_location($lat, $long) {
 	// users geotags stored in entity metadata current_latitude and current_longitude
 
 	// get logged in user
-	$user_id = elgg_get_logged_in_user_guid();
+	$user_guid = elgg_get_logged_in_user_guid();
 
 	// prepare data
 	$metadata = array(
@@ -23,12 +23,12 @@ function track_location($lat, $long) {
 	// if there is no, create it
 	foreach($metadata as $name => $value) {
 		$entry = elgg_get_metadata(array(
-			'guid' => $user_id, 
+			'guid' => $user_guid, 
 			'metadata_name' => $name
 		));
 
 		if (!$entry) {
-			create_metadata($user_id, $name, $value, '', 0);
+			create_metadata($user_guid, $name, $value, '', 0);
 		} else {
 			$entry->value = $value;
 			$entry->save();

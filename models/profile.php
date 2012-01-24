@@ -6,18 +6,18 @@ require_once 'functions.php';
  * Outer api method.
  *
  * @global stdClass $CONFIG
- * @param int $user_id
+ * @param int $user_guid
  * @return array
  */
-function profile_details($user_id, $limit = 5, $offset = 0) {
+function profile_details($user_guid, $limit = 5, $offset = 0) {
     // user exists?
-	$user = get_user($user_id);
+	$user = get_user($user_guid);
     if (!$user) {
         return 'No user';
     }
 
 	// fetch details of user obj
-	$details = get_object_details($user_id);
+	$details = get_object_details($user_guid);
     $real_details = array();
 
 	// get details
@@ -38,7 +38,7 @@ function profile_details($user_id, $limit = 5, $offset = 0) {
     }
 
 	// fetch additional details
-    $user_details = get_user_details($user_id, 'author' ,false, true, $limit, $offset);
+    $user_details = get_user_details($user_guid, 'author' ,false, true, $limit, $offset);
 
 	// merge all details and decode it safe
     $profile =  array_merge($real_details, $user_details);

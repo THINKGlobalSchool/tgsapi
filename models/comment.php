@@ -14,7 +14,7 @@ function comment_post($activity_id, $text) {
 	// get an activity
     $activity = get_river_item($activity_id);
 	// get object related to activity
-    $object_id = $activity->object_guid;
+    $object_guid = $activity->object_guid;
 
 	// get type of activity
     $type = get_activity_type($activity);
@@ -27,7 +27,7 @@ function comment_post($activity_id, $text) {
 
 	// create comment
     $user = elgg_get_logged_in_user_entity();
-    $res = create_annotation($object_id, 'generic_comment', $text, '', $user->guid, ACCESS_LOGGED_IN);
+    $res = create_annotation($object_guid, 'generic_comment', $text, '', $user->guid, ACCESS_LOGGED_IN);
 
     if ($res) {
         return TRUE;
@@ -39,15 +39,15 @@ function comment_post($activity_id, $text) {
 /**
  * Get the list of comments to given object represented by it's guid
  *
- * @param int $object_id
+ * @param int $object_guid
  * @param int $limit
  * @param int $offset
  * @return array|int array of comments or 0 if there is no one
  */
-function comments_list($object_id, $limit = 10, $offset = 0) {
+function comments_list($object_guid, $limit = 10, $offset = 0) {
 	// fetch comments
     $comments = elgg_get_annotations(array(
-		'guid' => $object_id, 
+		'guid' => $object_guid, 
 		'annotation_name' => 'generic_comment', 
 		'limit' => $limit, 
 		'offset' => $offset, 

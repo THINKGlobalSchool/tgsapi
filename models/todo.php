@@ -13,19 +13,13 @@ require_once 'functions.php';
  * @return array
  */
 function todo_list($status = 'incomplete', $limit = 10, $offset = 0, $user_role = 'all') {
-	error_log($status);
-	// get user id
-	$user_id = elgg_get_logged_in_user_guid();
-	// cast completement status to bool
-	$completed = ($status == 'completed' ? true : false);
+	// get user guid
+	$user_guid = elgg_get_logged_in_user_guid();
 
-	// we do not use elgg methods to get todo entities because they do not support filtering by wanted todo status
-	// so the limit-offset feature could not be implemented or it will cause serious performance problems
-	//$todos = get_todo_entities_ordered_by_date_due($user_id, $completed, $limit, $offset, $user_role);
 	
 	// Using TODO lib method :D:D:D
 	$options = array(
-		'container_guid' => $user_id,
+		'container_guid' => $user_guid,
 		'status' => $status,
 		'context' => $user_role,
 		'sort_order' => 'ASC',
@@ -51,7 +45,7 @@ function todo_list($status = 'incomplete', $limit = 10, $offset = 0, $user_role 
  */
 function get_todo_details($todo) {
 	$data = array();
-	$current_user_id = elgg_get_logged_in_user_guid();
+	$user_guid = elgg_get_logged_in_user_guid();
 	// todo assigner
 	$owner = $todo->getOwnerEntity();
 
@@ -63,7 +57,7 @@ function get_todo_details($todo) {
 
 	// is me an assigner. Necessery?
 	$is_me_an_assigner = false;
-	if ($owner->guid == $current_user_id) {
+	if ($owner->guid == $user_guid) {
 		$is_me_an_assigner = true;
 	}
 
@@ -124,7 +118,7 @@ function get_todo_details($todo) {
 
 		// for future purposes
 		// if current assignee is todo assigner, get some info about self accept and completness
-		if ($user->guid == $current_user_id) {
+		if ($user->guid == $user_guid) {
 			$is_me_in_assignees = true;
 			$accetted_by_me = $user_data['accepted'];
 			$completed_by_me = $user_data['completed'];
@@ -162,20 +156,20 @@ function get_todo_details($todo) {
 /**
  * Accepts the todo with give id
  *
- * @param int $todo_id
+ * @param int $todo_guid
  * @return bool operation success
  */
-function todo_accept($todo_id) {
+function todo_accept($todo_guid) {
 
-	$todo = get_entity($todo_id);
+	$todo = get_entity($todo_guid);
 
 	// could not find todo item
 	if (!$todo) {
 		return false;
 	}
 
-	$current_user_id = elgg_get_logged_in_user_guid();
-	$accepted = user_accept_todo($current_user_id, $todo->guid);
+	$user_guid = elgg_get_logged_in_user_guid();
+	$accepted = user_accept_todo($user_guid, $todo->guid);
 
 	return ($accepted ? true : false);
 }
@@ -191,10 +185,10 @@ function todo_accept($todo_id) {
  * @return int
  */
 function get_todos_count($status = 'unaccepted', $user_role = 'assignee') {
-	// get user id
-	$user_id = elgg_get_logged_in_user_guid();
+	// get user guid
+	$user_guid = elgg_get_logged_in_user_guid();
 
-	return count_unaccepted_todos($user_id);
+	return count_unaccepted_todos($user_guid);
 }
 
 
@@ -202,11 +196,11 @@ function get_todos_count($status = 'unaccepted', $user_role = 'assignee') {
  * Get todo details.
  * Outer api method.
  *
- * @param int $todo_id
+ * @param int $todo_guid
  * @return array
  */
-function todo_show($todo_id) {
-	$todo = get_entity($todo_id);
+function todo_show($todo_guid) {
+	$todo = get_entity($todo_guid);
 	
 	// could not find todo item
 	if (!$todo || $todo->getSubtype() != 'todo') {		
@@ -229,14 +223,14 @@ function todo_complete($todo_guid) {
 	
 
 	$todo = get_entity($todo_guid);
-	$current_user_id = elgg_get_logged_in_user_guid();
+	$user_guid = elgg_get_logged_in_user_guid();
 
 	if ($todo && $todo->getSubtype() == "todo") {
 
 		$submission = new ElggObject();
 		$submission->title = sprintf(elgg_echo('todo:label:submissiontitleprefix'), $todo->title);
 		$submission->subtype = "todosubmission";
-		$submission->owner_id = $current_user_id;
+		$submission->owner_id = $user_guid;
 		$submission->todo_guid = $todo_guid;
 		// NOTE: Access ID and ACL's handled by an event listener
 
@@ -248,15 +242,15 @@ function todo_complete($todo_guid) {
 		add_entity_relationship($submission->getGUID(), SUBMISSION_RELATIONSHIP, $todo_guid);
 		
 		// Add a relationship stating that the user has completed the todo
-		add_entity_relationship($current_user_id, COMPLETED_RELATIONSHIP, $todo_guid);
+		add_entity_relationship($user_guid, COMPLETED_RELATIONSHIP, $todo_guid);
 
 		// Accept the todo when completing (if not already accepted)
-		user_accept_todo($current_user_id, $todo_guid);
+		user_accept_todo($user_guid, $todo_guid);
 
 		// River
-		add_to_river('river/object/todosubmission/create', 'create', $current_user_id, $submission->getGUID());
+		add_to_river('river/object/todosubmission/create', 'create', $user_guid, $submission->getGUID());
 
-		$user = get_user($current_user_id);
+		$user = get_user($user_guid);
 		notify_user($todo->owner_guid,
 			elgg_get_site_entity()->guid,
 			elgg_echo('todo:email:subjectsubmission', array($user->name, $todo->title)),
