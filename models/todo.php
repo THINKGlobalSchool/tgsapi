@@ -259,11 +259,8 @@ function todo_complete($todo_guid) {
 		$user = get_user($current_user_id);
 		notify_user($todo->owner_guid,
 			elgg_get_site_entity()->guid,
-			elgg_echo('todo:email:subjectsubmission'),
-			sprintf(elgg_echo('todo:email:bodysubmission'),
-			$user->name,
-			$todo->title,
-			$todo->getURL())
+			elgg_echo('todo:email:subjectsubmission', array($user->name, $todo->title)),
+			elgg_echo('todo:email:bodysubmission', array($user->name, $todo->title, $todo->getURL()))
 		);
 		return true;
 	}
