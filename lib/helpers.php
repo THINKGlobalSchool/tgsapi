@@ -61,8 +61,6 @@ function get_object_details($entity_guid) {
  * @return array
  */
 function get_user_details($user_guid, $name = 'author', $full = true, $with_latest_activity = false, $latest_activity_limit = 5, $latest_activity_offset = 0) {
-	require_once dirname(dirname(__FILE__)) .'/config.php';
-
     $user = get_user($user_guid);
 
     $data = array();
@@ -75,7 +73,7 @@ function get_user_details($user_guid, $name = 'author', $full = true, $with_late
     }
 
 	if ($with_latest_activity) {	
-		foreach ($known_types as $subtype) {
+		foreach (elgg_get_config('tgsapi_known_subtypes') as $subtype) {
 			$subtype = sanitise_string($subtype);
 			$wheres[] = "(rv.subtype = '$subtype')";
 		}

@@ -1,7 +1,4 @@
 <?php
-
-require_once 'functions.php';
-
 /**
  * Get the list of activities.
  * Outer api method.
@@ -11,9 +8,7 @@ require_once 'functions.php';
  * @return array of activiti
  */
 function activity_list($limit = 10, $offset = 0) {
-    require_once dirname(dirname(__FILE__)) .'/config.php';
-    
-	foreach ($known_types as $subtype) {
+	foreach (elgg_get_config('tgsapi_known_subtypes') as $subtype) {
 		$subtype = sanitise_string($subtype);
 		$wheres[] = "(rv.subtype = '$subtype')";
 	}

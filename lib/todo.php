@@ -1,12 +1,9 @@
 <?php
-
-require_once 'functions.php';
-
 /**
  * Get the list of todos.
  * Outer api method.
  *
- * @param string $status todo status: ('completed', 'incompleted')
+ * @param string $status todo status: ('complete', 'incomplete')
  * @param int $limit how many activities should be returned
  * @param int $offset offset of the list
  * @param string @user_role  ('all', 'assigner', 'assignee')

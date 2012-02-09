@@ -1,6 +1,4 @@
 <?php
-require_once 'functions.php';
-
 /**
  * Posts given message to the wire.
  * Also sets geolocation to the post.

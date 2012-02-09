@@ -12,7 +12,7 @@ require_once("../../engine/start.php");
 	switch (@$env) {
 		case 'local':
 		default:
-			$site = 'http://localhost/elgg/';
+			$site = 'http://192.168.0.111/elgg/';
 			$token = auth_get_infinity_token('jtilson', 'jtilson');
 			$user_guid = get_user_by_username('jtilson')->guid;
 			break;
@@ -34,21 +34,21 @@ require_once("../../engine/start.php");
 	<hr />
 	<a href="<?=$site?>services/api/rest/xml/?method=profile.show&user_id=<?php echo $user_guid; ?>&limit=10&offset=0&auth_token=<?=$token?>">user profile</a>
 	<hr />
-	<a href="<?=$site?>services/api/rest/xml/?method=comments.list&object_id=24&auth_token=<?=$token?>">Comment list for object</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=comments.list&object_id=22178&auth_token=<?=$token?>">Comment list for object</a>
 	<hr />
 	<a href="<?=$site?>services/api/rest/xml/?method=albums.list&auth_token=<?=$token?>">Albums list for user</a>
 	<hr/>
-	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=completed&limit=10&offset=0&user_role=assigner&auth_token=<?=$token?>">Completed ToDo list (assigner)</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=complete&limit=10&offset=0&user_role=owned&auth_token=<?=$token?>">Completed ToDo list (owned)</a>
 <hr/>
-	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=completed&limit=10&offset=0&user_role=assignee&auth_token=<?=$token?>">Completed ToDo list (assignee)</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=complete&limit=10&offset=0&user_role=assigned&auth_token=<?=$token?>">Completed ToDo list (assigned)</a>
 	<hr/>
-	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=incompleted&limit=10&offset=0&user_role=assigner&auth_token=<?=$token?>">Incompleted ToDo list (assigner)</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=incomplete&limit=10&offset=0&user_role=owned&auth_token=<?=$token?>">Incompleted ToDo list (owned)</a>
 	<hr/>
-	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=incompleted&limit=10&offset=0&user_role=assignee&auth_token=<?=$token?>">Incompleted ToDo list (assignee)</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=incomplete&limit=10&offset=0&user_role=assigned&auth_token=<?=$token?>">Incompleted ToDo list (assigned)</a>
 	<hr/>
-	<a href="<?=$site?>services/api/rest/xml/?method=todos.count&status=unaccepted&user_role=assignee&auth_token=<?=$token?>">Count unaccepted todos assigned to me</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=todos.count&status=unaccepted&user_role=assigned&auth_token=<?=$token?>">Count unaccepted todos assigned to me</a>
 	<hr/>
-	<a href="<?=$site?>services/api/rest/xml/?method=todo.show&todo_id=376&auth_token=<?=$token?>">Get todo details</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=todo.show&todo_id=32217876&auth_token=<?=$token?>">Get todo details</a>
 	<hr />
 POST photo
 <form action="<?=$site?>services/api/rest/xml/?method=photo.add" enctype="multipart/form-data" method="post">

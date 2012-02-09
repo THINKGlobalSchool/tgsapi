@@ -9,31 +9,82 @@
  * @link http://www.thinkglobalschool.com
  */
 
-// require models
-require_once 'models/auth.php';
-require_once 'models/activity.php';
-require_once 'models/comment.php';
-require_once 'models/photo.php';
-require_once 'models/album.php';
-require_once 'models/profile.php';
-require_once 'models/wire.php';
-require_once 'models/video.php';
-require_once 'models/location.php';
-require_once 'models/stats.php';
-require_once 'models/todo.php';
-
-// Include functions
-require_once 'models/functions.php';
-
-// Register event
+// Register init event
 elgg_register_event_handler('init', 'system', 'tgsapi_init');
+elgg_register_event_handler('init', 'system', 'tgsapi_expose_functions', 501);
 
 /**
- * Initialize api to register api functions.
- * To register new function add expose_function definition
- *
+ *  Init Plugin
  */
-function tgsapi_init() {		
+function tgsapi_init() {
+	// Register and load libraries (Some are unused currently and are commented out)
+	$lib_path = elgg_get_plugins_path() . 'tgsapi/lib/';
+	elgg_register_library('tgsapi:activity', $lib_path . 'activity.php');
+	elgg_register_library('tgsapi:album', $lib_path . 'album.php');
+	elgg_register_library('tgsapi:auth', $lib_path . 'auth.php');
+	elgg_register_library('tgsapi:comment', $lib_path . 'comment.php');
+	elgg_register_library('tgsapi:helpers', $lib_path . 'helpers.php');
+	//elgg_register_library('tgsapi:location', $lib_path . 'location.php');
+	elgg_register_library('tgsapi:photo', $lib_path . 'photo.php');
+	elgg_register_library('tgsapi:profile', $lib_path . 'profile.php');
+	elgg_register_library('tgsapi:stats', $lib_path . 'stats.php');
+	elgg_register_library('tgsapi:todo', $lib_path . 'todo.php');
+	//elgg_register_library('tgsapi:video', $lib_path . 'video.php');
+	elgg_register_library('tgsapi:wire', $lib_path . 'wire.php');
+
+	elgg_load_library('tgsapi:helpers'); // Load first
+	elgg_load_library('tgsapi:activity');
+	elgg_load_library('tgsapi:album');
+	elgg_load_library('tgsapi:auth');
+	elgg_load_library('tgsapi:comment');
+	//elgg_load_library('tgsapi:location');
+	elgg_load_library('tgsapi:photo');
+	elgg_load_library('tgsapi:profile');
+	elgg_load_library('tgsapi:stats');
+	elgg_load_library('tgsapi:todo');
+	//elgg_load_library('tgsapi:video');
+	elgg_load_library('tgsapi:wire');
+
+	// Register delete token action
+	elgg_register_action("tgsapi/delete_token", elgg_get_plugins_path() . "tgsapi/actions/delete_token.php", 'admin');
+
+	// Admin menu
+	elgg_register_event_handler('pagesetup','system','tgsapi_adminmenu');
+
+	// Set up known subtypes variables
+	$known_subtypes = array(
+		'image',
+		'shared_doc',
+		'site_activity',
+		'album',
+		'blog',
+		'tidypics_batch',
+		'conversations',
+		'videolist',
+		'document',
+		'feedback',
+		'groupforumtopic',
+		'todo',
+		'bookmarks',
+		'group',
+		'thewire',
+		'todosubmission',
+		'file',
+		'user'
+	);
+
+	// Set known subtypes for API use
+	elgg_set_config('tgsapi_known_subtypes', $known_subtypes);
+	
+	// Set up known video extensions
+	$known_extensions = array('mpg', 'mpeg','avi','mp4', 'wmv', 'mov');
+	elgg_set_config('tgsapi_known_video_extensions', $known_subtypes);
+}
+
+/**
+ * Expose API functions
+ */
+function tgsapi_expose_functions() {
 	// Get the authentification token
 	expose_function("auth.get_infinity_token", "auth_get_infinity_token", array(
 			'username' => array ('type' => 'string'),
@@ -151,6 +202,7 @@ function tgsapi_init() {
 		), 'Add photo', 'POST', false, true);
 
 	// Post video
+	/* UNUSED
 	expose_function("video.add", "video_add", array (
             "title" => array (
                 "type" => 'string',
@@ -173,6 +225,7 @@ function tgsapi_init() {
                 "required" => false
             )
 		), 'Add video', 'POST', false, true);
+	*/
 
 	// Get comments list for given object
 	expose_function("comments.list", "comments_list", array (
@@ -222,6 +275,7 @@ function tgsapi_init() {
 		), 'Get photos list in album', 'GET', false, true);
 
 	// Track iphone location
+	/* UNUSED
 	expose_function ("location.track", "track_location", array (
             "lat" => array(
                 'type' => 'string',
@@ -232,6 +286,7 @@ function tgsapi_init() {
                 "required" => true
             )
 		), 'Track location', 'POST', false, true);
+	*/
 	
 	// Expose public site stats function
 	expose_function("site.stats", "get_site_stats", array(
@@ -260,11 +315,6 @@ function tgsapi_init() {
 					"required" => true
 			)
 		), "Get todo detail", 'GET', false, true);
-
-	elgg_register_action("tgsapi/delete_token", elgg_get_plugins_path() . "tgsapi/actions/delete_token.php", 'admin');
-
-	// Admin menu
-	elgg_register_event_handler('pagesetup','system','tgsapi_adminmenu');
 }
 
 /**

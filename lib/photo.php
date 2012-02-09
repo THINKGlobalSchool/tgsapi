@@ -1,7 +1,4 @@
 <?php
-
-require_once 'functions.php';
-
 /**
  * Get guid of mobile uploads album.
  * If it does not exist, create it.

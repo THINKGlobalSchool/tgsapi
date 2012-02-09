@@ -1,6 +1,4 @@
 <?php
-require_once 'functions.php';
-
 /**
  * Get user profile.
  * Outer api method.

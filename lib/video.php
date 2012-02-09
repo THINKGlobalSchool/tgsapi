@@ -1,7 +1,4 @@
 <?php
-
-require_once 'functions.php';
-
 /**
  * Post video to site.
  * Outer api method.
@@ -18,8 +15,6 @@ require_once 'functions.php';
  * @return true|string true on success and string (message) on error
  */
 function video_add($title, $caption = '', $tags = '', $lat, $long) {
-	require_once dirname(dirname(__FILE__)) .'/config.php';
-
     if (count($_FILES) == 0) {
         return 'no files';
     }
@@ -32,7 +27,7 @@ function video_add($title, $caption = '', $tags = '', $lat, $long) {
 		$dot_pos =  strrpos($file['name'], '.');
 		$file_ext = substr($file['name'], $dot_pos + 1, strlen($file['name']) - $dot_pos + 1);
 
-		if (!in_array($file_ext, $video_extensions)) {
+		if (!in_array($file_ext, elgg_get_config('tgsapi_known_video_extensions'))) {
 			return 'unacceptable file type';
 		}
 

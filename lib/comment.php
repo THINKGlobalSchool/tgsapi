@@ -1,7 +1,4 @@
 <?php
-
-require_once 'functions.php';
-
 /**
  * Post comment to given activity, represented by it's id.
  * Outer api method.
@@ -20,7 +17,20 @@ function comment_post($activity_id, $text) {
     $type = get_activity_type($activity);
 
 	// throw error on non-commentable activities
-    require_once dirname(dirname(__FILE__)) .'/config.php';
+	$black_list = array(
+		'shared_doc',
+		'site_activity',
+		'messages',
+		'pages_welcome',
+		'plugin',
+		'resourcerequest',
+		'resourcerequesttype',
+		'shared_access',
+		'site',
+		'widget',
+		'googleapps'
+	);
+
     if (in_array($type, $black_list)) {
         return 'THIS TYPE OF ACTIVITY IS NOT COMMENTABLE';
     }
