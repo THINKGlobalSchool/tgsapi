@@ -109,17 +109,6 @@ function get_user_details($user_guid, $name = 'author', $full = true, $with_late
 }
 
 /**
- * Get the path for icon of given activity type
- *
- * @param string $subtype
- * @return string
- */
-function get_category_icon($subtype) {
-    $path = elgg_get_site_url() . 'category_icons/';
-    return $path . $subtype . '.png';
-}
-
-/**
  * Get type of activity
  *
  * @param stdClass $activity
@@ -165,29 +154,6 @@ function html_entity_decode_recursive(&$value) {
         return $value = html_entity_decode(strip_tags($value), ENT_NOQUOTES, 'UTF-8');
     } else {
         return;
-    }
-}
-
-/**
- * Get last user's related entity
- *
- * @param string $subtype subtype of needed entity
- * @return ElggObject|false
- */
-function get_last_user_entities($subtype) {
-	// fetch 1 user's entity of given subtype (last modified will be at the top)
-	$e = elgg_get_entities(array(
-		'type' => 'object',
-		'subtype' => $subtype,
-		'owner_guid' => elgg_get_logged_in_user_guid(),
-		'limit' => 1
-	));
-
-	// if have needed, return, else return false
-    if (is_array($e) && (count($e) == 1)) {
-        return $e[0];
-    } else {
-        return false;
     }
 }
 

@@ -127,14 +127,16 @@ function photo_add($title, $caption = '', $tags = '', $album_guid, $lat, $long) 
 	$_REQUEST['tags'] = array(get_input('tags'));
 	$_REQUEST['image_guid'] = $uploaded_images;
 	$_REQUEST['container_guid'] = $album_guid;
-
+	
 	// set params to the posted photo
 	require_once (elgg_get_plugins_path() . "tidypics/actions/edit_multi.php");
 
-	// set geotag
-	$entity = get_last_user_entities('image');
-	if ($entity) {
-		entity_set_lat_long($entity, $lat, $lon);
+	if (count($uploaded_images) > 0) {
+		// set geotag
+		$entity = get_entity($uploaded_images[0]);
+		if ($entity) {
+			entity_set_lat_long($entity, $lat, $lon);
+		}
 	}
 
 	return true;

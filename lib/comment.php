@@ -28,7 +28,9 @@ function comment_post($activity_id, $text) {
 		'shared_access',
 		'site',
 		'widget',
-		'googleapps'
+		'googleapps',
+		'forum_topic',
+		'forum_reply',
 	);
 
     if (in_array($type, $black_list)) {

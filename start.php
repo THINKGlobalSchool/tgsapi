@@ -13,6 +13,10 @@
 elgg_register_event_handler('init', 'system', 'tgsapi_init');
 elgg_register_event_handler('init', 'system', 'tgsapi_expose_functions', 501);
 
+
+// DEBUG
+//date_default_timezone_set('America/New_York');
+
 /**
  *  Init Plugin
  */
@@ -59,18 +63,20 @@ function tgsapi_init() {
 		'album',
 		'blog',
 		'tidypics_batch',
-		'conversations',
+		//'conversations',
 		'videolist',
 		'document',
 		'feedback',
-		'groupforumtopic',
+		//'groupforumtopic',
 		'todo',
 		'bookmarks',
 		'group',
 		'thewire',
 		'todosubmission',
 		'file',
-		'user'
+		'user',
+		'forum_topic',
+		'forum_reply',
 	);
 
 	// Set known subtypes for API use

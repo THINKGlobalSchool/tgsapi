@@ -19,10 +19,9 @@ function api_post_to_wire($text, $lat = NULL, $long = NULL) {
 	// on production we use function tgswire_save_post()
 	// locally thewire_save_post() function is used
     //$ret_val = tgswire_save_post($text, $access, 0, "tgsapi");
-    $ret_val = thewire_save_post($text, $user_guid, $access, 0, "tgsapi");
-
-    // get the just created entity and set geolocation
-    $entity = get_last_user_entities('thewire');
+    $guid = thewire_save_post($text, $user_guid, $access, 0, "tgsapi");
+   
+    $entity = get_entity($guid);
 
     if ($entity) {
         entity_set_lat_long($entity, $lat, $long);

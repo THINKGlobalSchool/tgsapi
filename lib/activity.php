@@ -35,6 +35,9 @@ function activity_list($limit = 10, $offset = 0) {
         $data[] = activity_details($activity);
     }
 
+	// Unregister mentions rewrite handler.. it causes all kinds of hell with the JSON response
+	elgg_unregister_plugin_hook_handler('output', 'page', 'mentions_rewrite');
+
     return $data;
 }
 
@@ -66,7 +69,6 @@ function activity_details($activity) {
     $standard_data['id'] = (int) $activity->id;
     $standard_data['parent_id'] = $object_guid;
     $standard_data['type'] = $type;
-    $standard_data['category_icon_url'] = get_category_icon($type);
     $standard_data['time_created'] = $entity->time_created;
     $standard_data['comments_count'] = $entity->countComments();
     $standard_data['url'] = $entity->getURL();
@@ -136,7 +138,6 @@ function activity_details($activity) {
         case 'blog':
             $text = 'wrote a new blog post "'. $entity->title . '"';
             $brief_desc = 'wrote a new blog post "'. $entity->title . '"';
-//            $standard_data['excerpt'] = $object_details['excerpt'];
             break;
 
 		case 'tidypics_batch':
@@ -236,8 +237,8 @@ function activity_details($activity) {
             break;
 
         case 'thewire':
-            $text = $entity->description;
-            $brief_desc = $entity->description;
+			$text = $entity->description;
+			$brief_desc = $entity->description;	
             break;
 
         case 'todosubmission':
@@ -262,7 +263,20 @@ function activity_details($activity) {
             unset($standard_data['parent_id']);
 
             break;
-
+		
+		case 'forum_topic':
+			$forum = $entity->getContainerEntity();
+			$text = elgg_echo('river:create:object:forum_topic', array('', $entity->title, $forum->title));
+			$brief_desc = $text;
+			break;
+		case 'forum_reply':
+			$topic = get_entity($entity->topic_guid);
+			$forum = $entity->getContainerEntity();
+			$text = elgg_echo('river:create:object:forum_reply', array('', $topic->title, $forum->title));
+			$brief_desc = $text;
+			$object_details['excerpt'] = elgg_get_excerpt($entity->description);
+			//$object_details['description'] = ucfirst(trim($text)) . "\n\n" . elgg_get_excerpt($entity->description);
+			break;
         default:
             $text = 'description for '.  $type .' not ready yet';
             $brief_desc = 'description for '.  $type .' not ready yet';
