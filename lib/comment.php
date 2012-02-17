@@ -8,34 +8,25 @@
  * @return bool
  */
 function comment_post($activity_id, $text) {
+
 	// get an activity
-    $activity = get_river_item($activity_id);
+    $activity = elgg_get_river(array('id' => $activity_id));
+
+	// If have no activity, get outta here
+	if (!count($activity)) {
+		return FALSE;
+	}
+	
+	$activity = $activity[0];
+
 	// get object related to activity
     $object_guid = $activity->object_guid;
 
+	// get object
+	$object = get_entity($object_guid);
+
 	// get type of activity
-    $type = get_activity_type($activity);
-
-	// throw error on non-commentable activities
-	$black_list = array(
-		'shared_doc',
-		'site_activity',
-		'messages',
-		'pages_welcome',
-		'plugin',
-		'resourcerequest',
-		'resourcerequesttype',
-		'shared_access',
-		'site',
-		'widget',
-		'googleapps',
-		'forum_topic',
-		'forum_reply',
-	);
-
-    if (in_array($type, $black_list)) {
-        return 'THIS TYPE OF ACTIVITY IS NOT COMMENTABLE';
-    }
+    $type = $object->getSubtype() ? $object->getSubtype() : $object->getType();
 
 	// create comment
     $user = elgg_get_logged_in_user_entity();

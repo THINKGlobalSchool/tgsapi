@@ -1,28 +1,6 @@
 <?php
 
 /**
- * Retrieves item from the river
- *
- * @global stdClass $CONFIG
- * @param int $river_id river item id
- * @return stdClass
- */
-function get_river_item($river_id) {
-
-    // Get config
-    global $CONFIG;
-
-    // Construct main SQL
-    $sql = "select er.*" .
-                    " from {$CONFIG->dbprefix}river er" .
-                    " where id = {$river_id} ";
-
-    // Get data
-    $data = get_data($sql);
-    return $data[0];
-}
-
-/**
  * Get metadata of given entity
  *
  * @param int $entity_guid
@@ -56,11 +34,11 @@ function get_object_details($entity_guid) {
  * @param string $name name of the user in the result array key names
  * @param bool $full get full data or restricted
  * @param bool $with_latest_activity whether include or not latest user activities
- * @param int $latest_activity_limit
- * @param int $latest_activity_offset
+ * @param int $activity_limit
+ * @param int $activity_offset
  * @return array
  */
-function get_user_details($user_guid, $name = 'author', $full = true, $with_latest_activity = false, $latest_activity_limit = 5, $latest_activity_offset = 0) {
+function get_user_details($user_guid, $name = 'author', $full = true, $with_latest_activity = false, $activity_limit = 5, $activity_offset = 0) {
     $user = get_user($user_guid);
 
     $data = array();
@@ -73,70 +51,10 @@ function get_user_details($user_guid, $name = 'author', $full = true, $with_late
     }
 
 	if ($with_latest_activity) {	
-		foreach (elgg_get_config('tgsapi_known_subtypes') as $subtype) {
-			$subtype = sanitise_string($subtype);
-			$wheres[] = "(rv.subtype = '$subtype')";
-		}
-
-		if (is_array($wheres) && count($wheres)) {
-			$wheres = array(implode(' OR ', $wheres));
-		}
-
-		$wheres[0] = "({$wheres[0]})";
-		
-		// Get the users activity
-		$options = array(
-			'action_types' => array('create', 'comment'),
-			'subject_guids' => array($user_guid),
-			'limit' => $latest_activity_limit,
-			'offset' => $latest_activity_offset,
-			'wheres' => $wheres,
-		);
-		
-		$user_activity = elgg_get_river($options);
-		
-		$latest = array();
-
-		/// push activity details to the list
-		foreach ($user_activity as $activity) {
-			$latest[] = activity_details($activity);
-		}
-
-		$data['latest_activity'] = $latest;
+		$data['latest_activity'] = activity_list($activity_limit, $activity_offset, $subject_guids = array($user_guid));
 	}
 	
     return $data;
-}
-
-/**
- * Get type of activity
- *
- * @param stdClass $activity
- * @return string
- */
-function get_activity_type($activity) {
-    return (!empty($activity->subtype) ? $activity->subtype : $activity->type);
-}
-
-/**
- * Counts photos in the given album
- *
- * @global stdClass $CONFIG
- * @param int $albums_object_guid
- * @return int
- */
-function get_count_photos_in_album($albums_object_guid) {
-    // Get config
-    global $CONFIG;
-
-    // Construct main SQL
-    $sql = "select count(e.guid) as counter" .
-                    " from {$CONFIG->dbprefix}entities e" .
-                    " where container_guid = {$albums_object_guid} ";
-
-    // Get data
-    $data = get_data($sql);
-    return $data[0]->counter;
 }
 
 /**
@@ -269,4 +187,18 @@ function is_authenticated_on_google($username, $password) {
     }
 
 	return true;
+}
+
+/**
+ * Determine if we can comment on this type/subtype through the API
+ */
+function tgsapi_can_comment($type) {
+    return !in_array($type, elgg_get_config('tgsapi_comment_blacklist'));
+}
+
+/**
+ * Determine if we can comment on this type/subtype through the API
+ */
+function tgsapi_show_more($type) {
+    return in_array($type, elgg_get_config('tgsapi_show_more'));
 }

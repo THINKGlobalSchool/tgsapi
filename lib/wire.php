@@ -27,5 +27,5 @@ function api_post_to_wire($text, $lat = NULL, $long = NULL) {
         entity_set_lat_long($entity, $lat, $long);
     }
 
-    return $ret_val;
+    return $guid;
 }

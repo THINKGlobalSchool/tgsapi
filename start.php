@@ -9,18 +9,20 @@
  * @link http://www.thinkglobalschool.com
  */
 
-// Register init event
-elgg_register_event_handler('init', 'system', 'tgsapi_init');
-elgg_register_event_handler('init', 'system', 'tgsapi_expose_functions', 501);
-
+// Only register in REST context :D
+if (elgg_get_context() == 'rest') {
+	// Register init events
+	elgg_register_event_handler('init', 'system', 'tgsapi_init');
+	elgg_register_event_handler('init', 'system', 'tgsapi_expose_functions', 501);
+}
 
 // DEBUG
-//date_default_timezone_set('America/New_York');
+date_default_timezone_set('America/New_York');
 
 /**
  *  Init Plugin
  */
-function tgsapi_init() {
+function tgsapi_init() {	
 	// Register and load libraries (Some are unused currently and are commented out)
 	$lib_path = elgg_get_plugins_path() . 'tgsapi/lib/';
 	elgg_register_library('tgsapi:activity', $lib_path . 'activity.php');
@@ -54,6 +56,18 @@ function tgsapi_init() {
 
 	// Admin menu
 	elgg_register_event_handler('pagesetup','system','tgsapi_adminmenu');
+	
+	// Custom activity handlers
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'album', 'tgsapi_album_activity_handler');
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'image', 'tgsapi_image_activity_handler');
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'thewire', 'tgsapi_thewire_activity_handler');
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'shared_doc', 'tgsapi_shared_doc_activity_handler');
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'site_activity', 'tgsapi_site_activity_activity_handler');
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'tidypics_batch', 'tgsapi_tidypics_batch_activity_handler');
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'todo', 'tgsapi_todo_activity_handler');
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'todosubmission', 'tgsapi_todosubmission_activity_handler');
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'forum_topic', 'tgsapi_forum_topic_activity_handler');
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'forum_reply', 'tgsapi_forum_reply_activity_handler');
 
 	// Set up known subtypes variables
 	$known_subtypes = array(
@@ -63,24 +77,50 @@ function tgsapi_init() {
 		'album',
 		'blog',
 		'tidypics_batch',
-		//'conversations',
-		'videolist',
-		'document',
 		'feedback',
-		//'groupforumtopic',
 		'todo',
 		'bookmarks',
-		'group',
 		'thewire',
 		'todosubmission',
 		'file',
-		'user',
 		'forum_topic',
 		'forum_reply',
 	);
 
 	// Set known subtypes for API use
 	elgg_set_config('tgsapi_known_subtypes', $known_subtypes);
+	
+	// Set up comment blacklist
+	$comment_blacklist = array(
+		'shared_doc',
+		'site_activity',
+		'messages',
+		'pages_welcome',
+		'plugin',
+		'resourcerequest',
+		'resourcerequesttype',
+		'shared_access',
+		'site',
+		'widget',
+		'googleapps',
+		'forum_topic',
+		'forum_reply',
+	);
+
+	// Set up comment blacklist for API
+	elgg_set_config('tgsapi_comment_blacklist', $comment_blacklist);
+	
+	// Set up entities avaiable for 'show more' in the app
+	$show_more = array(
+		'todo',
+		'todosubmission',
+		'site_activity',
+		'shared_doc',
+		'blog',
+	);
+	
+	// Set entities for show more in the API
+	elgg_set_config('tgsapi_show_more', $show_more);
 	
 	// Set up known video extensions
 	$known_extensions = array('mpg', 'mpeg','avi','mp4', 'wmv', 'mov');
@@ -93,107 +133,107 @@ function tgsapi_init() {
 function tgsapi_expose_functions() {
 	// Get the authentification token
 	expose_function("auth.get_infinity_token", "auth_get_infinity_token", array(
-			'username' => array ('type' => 'string'),
-			'password' => array ('type' => 'string'),
+			'username' => array('type' => 'string'),
+			'password' => array('type' => 'string'),
 		), elgg_echo('auth.gettoken'),	'POST', false, false);
 
 	// Get the authentification token from google
 	expose_function("auth.get_google_token", "auth_get_google_token", array(
-			'username' => array ('type' => 'string'),
-			'password' => array ('type' => 'string'),
+			'username' => array('type' => 'string'),
+			'password' => array('type' => 'string'),
 		), elgg_echo('auth.gettoken'),	'POST', false, false);
 
 	// Get activity list
-	expose_function("activity.list", "activity_list", array (
-            "limit" => array (
+	expose_function("activity.list", "activity_list", array(
+            "limit" => array(
                 "type" => 'int',
                 "required" => false
             ),
-            "offset" => array (
+            "offset" => array(
                 "type" => 'int',
                 "required" => false
             )
 		), 'List all activities', 'GET', false, true);
 
 	// Fetch ToDo list
-	expose_function("todo.list", "todo_list", array (
-			"status" => array (
+	expose_function("todo.list", "todo_list", array(
+			"status" => array(
 					"type" => 'string',
 					"required" => false
 				),
-			"limit" => array (
+			"limit" => array(
                 "type" => 'int',
                 "required" => false
             ),
-            "offset" => array (
+            "offset" => array(
                 "type" => 'int',
                 "required" => false
 			),
-            "user_role" => array (
+            "user_role" => array(
                 "type" => 'string',
                 "required" => false
 			)
 		), 'Fetch todos', 'GET', false, true);
 
 	//Accept todo
-	expose_function("todo.accept", "todo_accept", array (
-			"todo_id" => array (
+	expose_function("todo.accept", "todo_accept", array(
+			"todo_id" => array(
                 "type" => 'int',
                 "required" => true
             )
 		), 'Accept todo', 'POST', false, true);
 
 	//Copmlete todo
-	expose_function("todo.complete", "todo_complete", array (
-			"todo_id" => array (
+	expose_function("todo.complete", "todo_complete", array(
+			"todo_id" => array(
                 "type" => 'int',
                 "required" => true
             )
 		), 'Complete todo', 'POST', false, true);
 
 	// Post comment
-	expose_function("comment.add", "comment_post", array (
-            "activity_id" => array (
+	expose_function("comment.add", "comment_post", array(
+            "activity_id" => array(
                 "type" => 'int',
                 "required" => true
             ),
-            "text" => array (
+            "text" => array(
                 "type" => 'string',
                 "required" => true
             )
 		), 'Post comment', 'POST', false, true);
 
 	// Get user profile
-	expose_function("profile.show", "profile_details", array (
-            "user_id" => array (
+	expose_function("profile.show", "profile_details", array(
+            "user_id" => array(
                 "type" => 'int',
                 "required" => true
             ),
-			"limit" => array (
+			"limit" => array(
                 "type" => 'int',
                 "required" => false
             ),
-            "offset" => array (
+            "offset" => array(
                 "type" => 'int',
                 "required" => false
 			)
 		), 'View user profile', 'GET', false, true);
 
 	// Post photo
-	expose_function("photo.add", "photo_add", array (
-            "title" => array (
+	expose_function("photo.add", "photo_add", array(
+            "title" => array(
                 "type" => 'string',
                 "required" => false
             ),
-            "caption" => array (
+            "caption" => array(
                 "type" => 'string',
                 "required" => false
             ),
-            "tags" => array (
+            "tags" => array(
                 "type" => 'string',
                 "required" => false
             ),
-            "album_id" => array (
+            "album_id" => array(
                 "type" => 'integer',
                 "required" => false
             ),
@@ -209,16 +249,16 @@ function tgsapi_expose_functions() {
 
 	// Post video
 	/* UNUSED
-	expose_function("video.add", "video_add", array (
-            "title" => array (
+	expose_function("video.add", "video_add", array(
+            "title" => array(
                 "type" => 'string',
                 "required" => false
             ),
-            "caption" => array (
+            "caption" => array(
                 "type" => 'string',
                 "required" => false
             ),
-            "tags" => array (
+            "tags" => array(
                 "type" => 'string',
                 "required" => false
             ),
@@ -234,23 +274,23 @@ function tgsapi_expose_functions() {
 	*/
 
 	// Get comments list for given object
-	expose_function("comments.list", "comments_list", array (
-            "object_id" => array (
+	expose_function("comments.list", "comments_list", array(
+            "object_id" => array(
                 "type" => 'int',
                 "required" => true
             ),
-            "limit" => array (
+            "limit" => array(
                 "type" => 'int',
                 "required" => false
             ),
-            "offset" => array (
+            "offset" => array(
                 "type" => 'int',
                 "required" => false
             )
 		), 'Get comments for object', 'GET', false, true);
 
 	// Post text message to the wire
-	expose_function ("thewire.post", "api_post_to_wire", array (
+	expose_function ("thewire.post", "api_post_to_wire", array(
             "text" => array(
                 'type' => 'string'
             ),
@@ -265,16 +305,16 @@ function tgsapi_expose_functions() {
         ), 'Post to the wire', 'POST', false, true);
         
 	// Get photos list in album
-	expose_function("photo.list", "get_photos_list_in_album", array (
-			"album_guid" => array (
+	expose_function("photo.list", "get_photos_list_in_album", array(
+			"album_guid" => array(
 					"type" => 'int',
 					"required" => true
 			)
 		), 'Get photos list in album', 'GET', false, true);
 
 	// Get albums list
-	expose_function("albums.list", "get_albums_list", array (
-			"user_id" => array (
+	expose_function("albums.list", "get_albums_list", array(
+			"user_id" => array(
 					"type" => 'int',
 					"required" => false
 			)
@@ -282,7 +322,7 @@ function tgsapi_expose_functions() {
 
 	// Track iphone location
 	/* UNUSED
-	expose_function ("location.track", "track_location", array (
+	expose_function ("location.track", "track_location", array(
             "lat" => array(
                 'type' => 'string',
                 "required" => true
@@ -304,11 +344,11 @@ function tgsapi_expose_functions() {
 
 	// Add method, that should return an amount of {status} todos assigned to me
 	expose_function("todos.count", "get_todos_count", array(
-			'status' => array (
+			'status' => array(
 					'type' => 'string',
 					'required' => false
 				),
-			'user_role' => array (
+			'user_role' => array(
 					'type' => 'string',
 					'required' => false
 				)
@@ -316,7 +356,7 @@ function tgsapi_expose_functions() {
 
 	// Get certain todo details
 	expose_function("todo.show", "todo_show", array(
-			"todo_id" => array (
+			"todo_id" => array(
 					"type" => 'int',
 					"required" => true
 			)
