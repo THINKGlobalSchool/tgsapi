@@ -16,8 +16,11 @@ if (elgg_get_context() == 'rest') {
 	elgg_register_event_handler('init', 'system', 'tgsapi_expose_functions', 501);
 }
 
+// Global Init
+elgg_register_event_handler('init', 'system', 'tgsapi_global_init');
+
 // DEBUG
-date_default_timezone_set('America/New_York');
+//date_default_timezone_set('America/New_York');
 
 /**
  *  Init Plugin
@@ -51,12 +54,6 @@ function tgsapi_init() {
 	//elgg_load_library('tgsapi:video');
 	elgg_load_library('tgsapi:wire');
 
-	// Register delete token action
-	elgg_register_action("tgsapi/delete_token", elgg_get_plugins_path() . "tgsapi/actions/delete_token.php", 'admin');
-
-	// Admin menu
-	elgg_register_event_handler('pagesetup','system','tgsapi_adminmenu');
-	
 	// Custom activity handlers
 	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'album', 'tgsapi_album_activity_handler');
 	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'image', 'tgsapi_image_activity_handler');
@@ -361,6 +358,15 @@ function tgsapi_expose_functions() {
 					"required" => true
 			)
 		), "Get todo detail", 'GET', false, true);
+}
+
+// Global Init Function
+function tgsapi_global_init() {
+	// Admin menu
+	elgg_register_event_handler('pagesetup','system','tgsapi_adminmenu');
+	
+	// Register delete token action
+	elgg_register_action("tgsapi/delete_token", elgg_get_plugins_path() . "tgsapi/actions/delete_token.php", 'admin');
 }
 
 /**
