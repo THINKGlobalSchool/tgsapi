@@ -28,6 +28,9 @@ $english = array(
 	'tgsapi:forum_topic' => 'Forum Topic',
 	'tgsapi:forum_reply' => 'Forum Reply',
 	
+	// General stuff
+	'tgsapi:description:album' => "Photo album \"%s\"\n%s",
+	
 	// Cleaner password error
 	'APIException:MissingParameterInMethod' => 'Missing parameter \'%s\'',
 	

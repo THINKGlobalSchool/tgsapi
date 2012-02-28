@@ -127,6 +127,37 @@ function tgsapi_album_activity_handler($hook, $type, $return, $params) {
         $album_cover = elgg_get_site_url() . 'mod/tidypics/graphics/image_error_small.png';
     }
 	$return['image_url'] = $album_cover;
+	$return['description'] = elgg_echo('tgsapi:description:album', array($object->title, $object->description));
+	return $return;
+}
+
+/**
+ * Modify the activity item output for blog entities
+ *
+ * @param string $hook
+ * @param string $type
+ * @param Array $return
+ * @param Array $params
+ * @return unknown
+ */
+function tgsapi_blog_activity_handler($hook, $type, $return, $params) {
+	$object = $params['object'];
+	$return['description'] = $object->title . "\n\n" . $object->excerpt;
+	return $return;
+}
+
+/**
+ * Modify the activity item output for bookmarks entities
+ *
+ * @param string $hook
+ * @param string $type
+ * @param Array $return
+ * @param Array $params
+ * @return unknown
+ */
+function tgsapi_bookmarks_activity_handler($hook, $type, $return, $params) {
+	$object = $params['object'];
+	$return['description'] = $object->address . "\n\n" . $object->description;
 	return $return;
 }
 
@@ -145,6 +176,35 @@ function tgsapi_image_activity_handler($hook, $type, $return, $params) {
 	return $return;
 }
 
+/**
+ * Modify the activity item output for feedback entities
+ *
+ * @param string $hook
+ * @param string $type
+ * @param Array $return
+ * @param Array $params
+ * @return unknown
+ */
+function tgsapi_feedback_activity_handler($hook, $type, $return, $params) {
+	$object = $params['object'];
+	$return['description'] = $object->txt;
+	return $return;
+}
+
+/**
+ * Modify the activity item output for file entities
+ *
+ * @param string $hook
+ * @param string $type
+ * @param Array $return
+ * @param Array $params
+ * @return unknown
+ */
+function tgsapi_file_activity_handler($hook, $type, $return, $params) {
+	$object = $params['object'];
+	$return['description'] = $return['brief_description'];
+	return $return;
+}
 
 /**
  * Modify the activity item output for thewire entities
@@ -174,6 +234,7 @@ function tgsapi_shared_doc_activity_handler($hook, $type, $return, $params) {
 	$object = $params['object'];
 	$text = elgg_echo('river:create:object:shared_doc', array('', "\"{$object->trunc_title}\""));
 	$return['brief_description'] = ucfirst(trim($text));
+	$return['description'] = $return['brief_description'];
 	$return['url'] = $object->href;
 	return $return;
 }
@@ -191,6 +252,7 @@ function tgsapi_site_activity_activity_handler($hook, $type, $return, $params) {
 	$object = $params['object'];
 	$text = str_replace($return['subject_name'], '', strip_tags($object->text));
     $return['brief_description'] = ucfirst(trim($text));
+	$return['description'] = $return['brief_description'];
 	$return['url'] = get_pure_url($object->text, false);
 	return $return;
 }
@@ -247,6 +309,7 @@ function tgsapi_tidypics_batch_activity_handler($hook, $type, $return, $params) 
 function tgsapi_todo_activity_handler($hook, $type, $return, $params) {
 	$object = $params['object'];
 	$return['related_guid'] = $object->guid;
+	$return['description'] = $return['brief_description'];
 	return $return;
 }
 
@@ -277,6 +340,8 @@ function tgsapi_todosubmission_activity_handler($hook, $type, $return, $params) 
 
 	access_show_hidden_entities($access_status);
 	$return['brief_description'] =  ucfirst(trim($text));
+	$return['description'] = $return['brief_description'];
+
 	$return['related_guid'] = $object->todo_guid;
 	return $return;
 }
@@ -295,6 +360,7 @@ function tgsapi_forum_topic_activity_handler($hook, $type, $return, $params) {
 	$forum = $object->getContainerEntity();
 	$text = elgg_echo('river:create:object:forum_topic', array('', "\"{$object->title}\"", "\"{$forum->title}\""));
 	$return['brief_description'] = ucfirst(trim($text));
+	$return['description'] = $return['brief_description'];
 	return $return;
 }
 
@@ -313,5 +379,6 @@ function tgsapi_forum_reply_activity_handler($hook, $type, $return, $params) {
 	$forum = $object->getContainerEntity();
 	$text = elgg_echo('river:create:object:forum_reply', array('', "\"{$topic->title}\"", "\"{$forum->title}\""));
 	$return['brief_description'] = ucfirst(trim($text));
+	$return['description'] = $return['brief_description'] . "\n\n" . $object->description;
 	return $return;
 }

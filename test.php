@@ -9,8 +9,6 @@ require_once("../../engine/start.php");
 // This will allow session logins
 register_pam_handler('pam_auth_session');
 
-var_dump(tgsapi_can_comment('site_activity'));
-
 // Admins only
 if (!elgg_is_admin_logged_in()) {
 	echo "Access Denied";
@@ -38,8 +36,6 @@ echo $site;
 	<h1>API TEST</h1>
 	<hr/>
 	<a href="<?=$site?>services/api/rest/xml/?method=activity.list&limit=10&offset=0">Activity list</a>
-	<hr />
-	<a href="<?=$site?>services/api/rest/xml/?method=activity.list.x&limit=10&offset=0">Activity listx</a>
 	<hr />
 	<a href="<?=$site?>services/api/rest/xml/?method=profile.show&user_id=<?php echo $user_guid; ?>&limit=10&offset=0">user profile</a>
 	<hr />

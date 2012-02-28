@@ -7,6 +7,9 @@
  * @author Jeff Tilson
  * @copyright Think Global School 2009-2010
  * @link http://www.thinkglobalschool.com
+ * 
+ * @TODO:
+ * - Some sort of upgrade available detection (as the API will be incompatible with older clients)
  */
 
 // Only register in REST context :D
@@ -56,7 +59,11 @@ function tgsapi_init() {
 
 	// Custom activity handlers
 	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'album', 'tgsapi_album_activity_handler');
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'blog', 'tgsapi_blog_activity_handler');
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'bookmarks', 'tgsapi_bookmarks_activity_handler');
 	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'image', 'tgsapi_image_activity_handler');
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'feedback', 'tgsapi_feedback_activity_handler');
+	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'file', 'tgsapi_file_activity_handler');
 	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'thewire', 'tgsapi_thewire_activity_handler');
 	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'shared_doc', 'tgsapi_shared_doc_activity_handler');
 	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'site_activity', 'tgsapi_site_activity_activity_handler');
@@ -114,6 +121,7 @@ function tgsapi_init() {
 		'site_activity',
 		'shared_doc',
 		'blog',
+		'bookmarks',
 	);
 	
 	// Set entities for show more in the API
