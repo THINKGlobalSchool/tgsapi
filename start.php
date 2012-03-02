@@ -39,6 +39,7 @@ function tgsapi_init() {
 	//elgg_register_library('tgsapi:location', $lib_path . 'location.php');
 	elgg_register_library('tgsapi:photo', $lib_path . 'photo.php');
 	elgg_register_library('tgsapi:profile', $lib_path . 'profile.php');
+	elgg_register_library('tgsapi:roles', $lib_path . 'roles.php');
 	elgg_register_library('tgsapi:stats', $lib_path . 'stats.php');
 	elgg_register_library('tgsapi:todo', $lib_path . 'todo.php');
 	//elgg_register_library('tgsapi:video', $lib_path . 'video.php');
@@ -53,6 +54,7 @@ function tgsapi_init() {
 	elgg_load_library('tgsapi:photo');
 	elgg_load_library('tgsapi:profile');
 	elgg_load_library('tgsapi:stats');
+	elgg_load_library('tgsapi:roles');
 	elgg_load_library('tgsapi:todo');
 	//elgg_load_library('tgsapi:video');
 	elgg_load_library('tgsapi:wire');
@@ -140,232 +142,263 @@ function tgsapi_expose_functions() {
 	expose_function("auth.get_infinity_token", "auth_get_infinity_token", array(
 			'username' => array('type' => 'string'),
 			'password' => array('type' => 'string'),
-		), elgg_echo('auth.gettoken'),	'POST', false, false);
+	), elgg_echo('auth.gettoken'),	'POST', FALSE, FALSE);
 
 	// Get the authentification token from google
 	expose_function("auth.get_google_token", "auth_get_google_token", array(
 			'username' => array('type' => 'string'),
 			'password' => array('type' => 'string'),
-		), elgg_echo('auth.gettoken'),	'POST', false, false);
+	), elgg_echo('auth.gettoken'),	'POST', FALSE, FALSE);
 
 	// Get activity list
-	expose_function("activity.list", "activity_list", array(
-            "limit" => array(
-                "type" => 'int',
-                "required" => false
+	expose_function('activity.list', 'activity_list', array(
+            'limit' => array(
+                'type' => 'int',
+                'required' => FALSE
             ),
-            "offset" => array(
-                "type" => 'int',
-                "required" => false
-            )
-		), 'List all activities', 'GET', false, true);
+            'offset' => array(
+                'type' => 'int',
+                'required' => FALSE
+            ),
+			'subtype' => array(
+				'type' => 'string',
+				'required' => FALSE
+			),
+			'role' => array(
+				'type' => 'string',
+				'required' => FALSE
+			),
+			'subject_guid' => array(
+				'type' => 'int',
+				'required' => FALSE
+			),
+	), 'List all activities', 'GET', FALSE, TRUE);
 
 	// Fetch ToDo list
-	expose_function("todo.list", "todo_list", array(
-			"status" => array(
-					"type" => 'string',
-					"required" => false
+	expose_function('todo.list', 'todo_list', array(
+			'status' => array(
+					'type' => 'string',
+					'required' => FALSE
 				),
-			"limit" => array(
-                "type" => 'int',
-                "required" => false
+			'limit' => array(
+                'type' => 'int',
+                'required' => FALSE
             ),
-            "offset" => array(
-                "type" => 'int',
-                "required" => false
+            'offset' => array(
+                'type' => 'int',
+                'required' => FALSE
 			),
-            "user_role" => array(
-                "type" => 'string',
-                "required" => false
+            'user_role' => array(
+                'type' => 'string',
+                'required' => FALSE
 			)
-		), 'Fetch todos', 'GET', false, true);
+	), 'Fetch todos', 'GET', FALSE, TRUE);
 
 	//Accept todo
-	expose_function("todo.accept", "todo_accept", array(
-			"todo_id" => array(
-                "type" => 'int',
-                "required" => true
+	expose_function('todo.accept', 'todo_accept', array(
+			'todo_id' => array(
+                'type' => 'int',
+                'required' => TRUE
             )
-		), 'Accept todo', 'POST', false, true);
+	), 'Accept todo', 'POST', FALSE, TRUE);
 
 	//Copmlete todo
-	expose_function("todo.complete", "todo_complete", array(
-			"todo_id" => array(
-                "type" => 'int',
-                "required" => true
+	expose_function('todo.complete', 'todo_complete', array(
+			'todo_id' => array(
+                'type' => 'int',
+                'required' => TRUE
             )
-		), 'Complete todo', 'POST', false, true);
+	), 'Complete todo', 'POST', FALSE, TRUE);
 
 	// Post comment
-	expose_function("comment.add", "comment_post", array(
-            "activity_id" => array(
-                "type" => 'int',
-                "required" => true
+	expose_function('comment.add', 'comment_post', array(
+            'activity_id' => array(
+                'type' => 'int',
+                'required' => TRUE
             ),
-            "text" => array(
-                "type" => 'string',
-                "required" => true
+            'text' => array(
+                'type' => 'string',
+                'required' => TRUE
             )
-		), 'Post comment', 'POST', false, true);
+	), 'Post comment', 'POST', FALSE, TRUE);
 
 	// Get user profile
-	expose_function("profile.show", "profile_details", array(
-            "user_id" => array(
-                "type" => 'int',
-                "required" => true
+	expose_function('profile.show', 'profile_details', array(
+            'user_id' => array(
+                'type' => 'int',
+                'required' => TRUE
             ),
-			"limit" => array(
-                "type" => 'int',
-                "required" => false
+			'limit' => array(
+                'type' => 'int',
+                'required' => FALSE
             ),
-            "offset" => array(
-                "type" => 'int',
-                "required" => false
+            'offset' => array(
+                'type' => 'int',
+                'required' => FALSE
 			)
-		), 'View user profile', 'GET', false, true);
+	), 'View user profile', 'GET', FALSE, TRUE);
 
 	// Post photo
-	expose_function("photo.add", "photo_add", array(
-            "title" => array(
-                "type" => 'string',
-                "required" => false
-            ),
-            "caption" => array(
-                "type" => 'string',
-                "required" => false
-            ),
-            "tags" => array(
-                "type" => 'string',
-                "required" => false
-            ),
-            "album_id" => array(
-                "type" => 'integer',
-                "required" => false
-            ),
-            "lat" => array(
+	expose_function('photo.add', 'photo_add', array(
+            'title' => array(
                 'type' => 'string',
-                "required" => false
+                'required' => FALSE
             ),
-            "long" => array(
+            'caption' => array(
                 'type' => 'string',
-                "required" => false
+                'required' => FALSE
+            ),
+            'tags' => array(
+                'type' => 'string',
+                'required' => FALSE
+            ),
+            'album_id' => array(
+                'type' => 'integer',
+                'required' => FALSE
+            ),
+            'lat' => array(
+                'type' => 'string',
+                'required' => FALSE
+            ),
+            'long' => array(
+                'type' => 'string',
+                'required' => FALSE
             )
-		), 'Add photo', 'POST', false, true);
+	), 'Add photo', 'POST', FALSE, TRUE);
 
 	// Post video
 	/* UNUSED
-	expose_function("video.add", "video_add", array(
-            "title" => array(
-                "type" => 'string',
-                "required" => false
-            ),
-            "caption" => array(
-                "type" => 'string',
-                "required" => false
-            ),
-            "tags" => array(
-                "type" => 'string',
-                "required" => false
-            ),
-            "lat" => array(
+	expose_function('video.add', 'video_add', array(
+            'title' => array(
                 'type' => 'string',
-                "required" => false
+                'required' => FALSE
             ),
-            "long" => array(
+            'caption' => array(
                 'type' => 'string',
-                "required" => false
+                'required' => FALSE
+            ),
+            'tags' => array(
+                'type' => 'string',
+                'required' => FALSE
+            ),
+            'lat' => array(
+                'type' => 'string',
+                'required' => FALSE
+            ),
+            'long' => array(
+                'type' => 'string',
+                'required' => FALSE
             )
-		), 'Add video', 'POST', false, true);
+		), 'Add video', 'POST', FALSE, TRUE);
 	*/
 
 	// Get comments list for given object
-	expose_function("comments.list", "comments_list", array(
-            "object_id" => array(
-                "type" => 'int',
-                "required" => true
+	expose_function('comments.list', 'comments_list', array(
+            'object_id' => array(
+                'type' => 'int',
+                'required' => TRUE
             ),
-            "limit" => array(
-                "type" => 'int',
-                "required" => false
+            'limit' => array(
+                'type' => 'int',
+                'required' => FALSE
             ),
-            "offset" => array(
-                "type" => 'int',
-                "required" => false
+            'offset' => array(
+                'type' => 'int',
+                'required' => FALSE
             )
-		), 'Get comments for object', 'GET', false, true);
+	), 'Get comments for object', 'GET', FALSE, TRUE);
 
 	// Post text message to the wire
-	expose_function ("thewire.post", "api_post_to_wire", array(
-            "text" => array(
+	expose_function ('thewire.post', 'api_post_to_wire', array(
+            'text' => array(
                 'type' => 'string'
             ),
-            "lat" => array(
+            'lat' => array(
                 'type' => 'string',
-                "required" => false
+                'required' => FALSE
             ),
-            "long" => array(
+            'long' => array(
                 'type' => 'string',
-                "required" => false
+                'required' => FALSE
             )
-        ), 'Post to the wire', 'POST', false, true);
+    ), 'Post to the wire', 'POST', FALSE, TRUE);
         
 	// Get photos list in album
-	expose_function("photo.list", "get_photos_list_in_album", array(
-			"album_guid" => array(
-					"type" => 'int',
-					"required" => true
+	expose_function('photo.list', 'get_photos_list_in_album', array(
+			'album_guid' => array(
+					'type' => 'int',
+					'required' => TRUE
 			)
-		), 'Get photos list in album', 'GET', false, true);
+	), 'Get photos list in album', 'GET', FALSE, TRUE);
 
 	// Get albums list
-	expose_function("albums.list", "get_albums_list", array(
-			"user_id" => array(
-					"type" => 'int',
-					"required" => false
+	expose_function('albums.list', 'get_albums_list', array(
+			'user_id' => array(
+					'type' => 'int',
+					'required' => FALSE
 			)
-		), 'Get photos list in album', 'GET', false, true);
+	), 'Get photos list in album', 'GET', FALSE, TRUE);
 
 	// Track iphone location
 	/* UNUSED
-	expose_function ("location.track", "track_location", array(
-            "lat" => array(
+	expose_function ('location.track', 'track_location', array(
+            'lat' => array(
                 'type' => 'string',
-                "required" => true
+                'required' => TRUE
             ),
-            "long" => array(
+            'long' => array(
                 'type' => 'string',
-                "required" => true
+                'required' => TRUE
             )
-		), 'Track location', 'POST', false, true);
+		), 'Track location', 'POST', FALSE, TRUE);
 	*/
 	
 	// Expose public site stats function
-	expose_function("site.stats", "get_site_stats", array(
+	expose_function('site.stats', 'get_site_stats', array(
 			'photo_limit' => array(
 					'type' => 'string', 
-					'required' => true
+					'required' => TRUE
 			)
-		), "Get Site Stats", 'GET', false, false);
+	), 'Get Site Stats', 'GET', FALSE, FALSE);
 
 	// Add method, that should return an amount of {status} todos assigned to me
-	expose_function("todos.count", "get_todos_count", array(
+	expose_function('todos.count', 'get_todos_count', array(
 			'status' => array(
 					'type' => 'string',
-					'required' => false
+					'required' => FALSE
 				),
 			'user_role' => array(
 					'type' => 'string',
-					'required' => false
+					'required' => FALSE
 				)
-		), "Get todos count", 'GET', false, true);
+	), 'Get todos count', 'GET', FALSE, TRUE);
 
 	// Get certain todo details
-	expose_function("todo.show", "todo_show", array(
-			"todo_id" => array(
-					"type" => 'int',
-					"required" => true
+	expose_function('todo.show', 'todo_show', array(
+			'todo_id' => array(
+					'type' => 'int',
+					'required' => TRUE
 			)
-		), "Get todo detail", 'GET', false, true);
+	), 'Get todo detail', 'GET', FALSE, TRUE);
+		
+	// Get roles
+	expose_function('roles.list', 'tgsapi_get_roles', array(
+		'limit' => array(
+			'type' => 'int',
+			'required' => FALSE,
+		), 
+		'show_all' => array(
+			'type' => 'int',
+			'required' => FALSE,
+		),
+		'show_hidden' => array(
+			'type' => 'int',
+			'required' => FALSE,
+		),
+	), 'Get roles', 'GET', FALSE, TRUE);
+	
+	// Get roles
+	expose_function('subtypes.list', 'tgsapi_get_subtypes', array(), 'Get subtypes', 'GET', FALSE, TRUE);
 }
 
 // Global Init Function

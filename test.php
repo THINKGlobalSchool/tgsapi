@@ -55,6 +55,10 @@ echo $site;
 	<hr/>
 	<a href="<?=$site?>services/api/rest/xml/?method=todo.show&todo_id=32217876">Get todo details</a>
 	<hr />
+	<a href="<?=$site?>services/api/rest/xml/?method=roles.list">Get roles</a>
+	<hr />
+	<a href="<?=$site?>services/api/rest/xml/?method=subtypes.list">Get subtypes</a>
+	<hr />
 POST photo
 <form action="<?=$site?>services/api/rest/xml/?method=photo.add" enctype="multipart/form-data" method="post">
 <input type="hidden" name="auth_token" value="<?=$token?>">

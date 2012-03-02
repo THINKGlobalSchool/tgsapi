@@ -3,24 +3,47 @@
  * Get Activity
  * Outer api method.
  *
- * @param int $limit how many activities should be returned
- * @param int $offset offset of the list
- * @return array of activiti
+ * @param int    $limit        how many activities should be returned
+ * @param int    $offset       offset of the list
+ * @param int    $subject_guid specific user guid to grab
+ * @param string $subtype      specific subtype to grab
+ * @param int    $role         specific role to grab
+ *
+ * @return array of activity
  */
-function activity_list($limit = 10, $offset = 0, $subject_guids = NULL) {
+function activity_list($limit = 10, $offset = 0, $subtype = NULL, $role = NULL, $subject_guid = NULL) {
 	// Unregister mentions rewrite handler.. it causes all kinds of hell with the JSON response
 	elgg_unregister_plugin_hook_handler('output', 'page', 'mentions_rewrite');
-	
+
+	// Default options
 	$options = array(
 		'action_types' => array('create'),
 		'limit' => $limit,
 		'offset' => $offset,
-		'subject_guids' => $subject_guids,
-		'subtypes' => elgg_get_config('tgsapi_known_subtypes'),
+		'subject_guid' => $subject_guid ? $subject_guid : ELGG_ENTITIES_ANY_VALUE,
 	);
-	
-	$items = elgg_get_river($options);
 
+	// If supplied a of subtype, use it
+	if ($subtype) {
+		$options['subtype'] = $subtype;
+	} else {
+		// Default (all) subtypes
+		$options['subtypes'] = elgg_get_config('tgsapi_known_subtypes');
+	}
+
+	// If supplied a role, use it
+	if ($role) {
+		$options['relationship'] = ROLE_RELATIONSHIP;
+		$options['relationship_guid'] = $role;
+		$options['inverse_relationship'] = TRUE;
+	}
+ 
+	// Get river items
+	$items = elgg_get_river($options);
+	
+	$data = array();
+
+	// Format/process river items
 	foreach ($items as $item) {
 		$data[] = activity_details($item);
 	}

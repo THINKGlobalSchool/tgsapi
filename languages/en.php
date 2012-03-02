@@ -10,6 +10,8 @@ $english = array(
 	'user:not_activated' => 'Looks like your account is not active',
 	'tgsapi:admin' => 'TGS API Admin',
 	
+	'item:object:tidypics_batch' => 'Photos',
+	
 	// API Subtypes
 	'tgsapi:thewire' => 'Post',
 	'tgsapi:tidypics_batch' => 'Photos',

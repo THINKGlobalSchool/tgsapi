@@ -51,7 +51,7 @@ function get_user_details($user_guid, $name = 'author', $full = true, $with_late
     }
 
 	if ($with_latest_activity) {	
-		$data['latest_activity'] = activity_list($activity_limit, $activity_offset, $subject_guids = array($user_guid));
+		$data['latest_activity'] = activity_list($activity_limit, $activity_offset, NULL, NULL, $subject_guid = $user_guid);
 	}
 	
     return $data;
@@ -201,4 +201,25 @@ function tgsapi_can_comment($type) {
  */
 function tgsapi_show_more($type) {
     return in_array($type, elgg_get_config('tgsapi_show_more'));
+}
+
+/**
+ * API exposed function to get a list of enabled subtypes
+ */
+function tgsapi_get_subtypes() {
+	$subtypes = elgg_get_config('tgsapi_known_subtypes');
+	
+	$subtypes_array[] = array(
+		'subtype' => '0', 
+		'label' => elgg_echo('all')
+	);
+	
+	foreach ($subtypes as $subtype) {
+		$subtypes_array[] = array(
+			'subtype' => $subtype,
+			'label' => elgg_echo("item:object:$subtype")
+		);
+	}
+
+	return $subtypes_array;
 }
