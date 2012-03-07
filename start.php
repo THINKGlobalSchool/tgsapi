@@ -28,7 +28,7 @@ elgg_register_event_handler('init', 'system', 'tgsapi_global_init');
 /**
  *  Init Plugin
  */
-function tgsapi_init() {	
+function tgsapi_init() {
 	// Register and load libraries (Some are unused currently and are commented out)
 	$lib_path = elgg_get_plugins_path() . 'tgsapi/lib/';
 	elgg_register_library('tgsapi:activity', $lib_path . 'activity.php');
@@ -59,6 +59,9 @@ function tgsapi_init() {
 	//elgg_load_library('tgsapi:video');
 	elgg_load_library('tgsapi:wire');
 
+	// Override API init
+	elgg_register_plugin_hook_handler('rest', 'init', 'tgsapi_init_handler');	
+
 	// Custom activity handlers
 	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'album', 'tgsapi_album_activity_handler');
 	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'blog', 'tgsapi_blog_activity_handler');
@@ -74,6 +77,9 @@ function tgsapi_init() {
 	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'todosubmission', 'tgsapi_todosubmission_activity_handler');
 	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'forum_topic', 'tgsapi_forum_topic_activity_handler');
 	elgg_register_plugin_hook_handler('tgsapi:activity_content', 'forum_reply', 'tgsapi_forum_reply_activity_handler');
+
+	// Set tgsapi version
+	elgg_set_config('tgsapi_version', 2);
 
 	// Set up known subtypes variables
 	$known_subtypes = array(
@@ -408,6 +414,18 @@ function tgsapi_global_init() {
 	
 	// Register delete token action
 	elgg_register_action("tgsapi/delete_token", elgg_get_plugins_path() . "tgsapi/actions/delete_token.php", 'admin');
+}
+
+// Use custom authentication handlers for the api
+function tgsapi_init_handler() {
+	// @TODO TESTING ONLY
+//	register_pam_handler('pam_auth_session');
+
+	// user token can also be used for user authentication
+	register_pam_handler('pam_auth_usertoken');
+
+	// Returning true here cancels out all other pam handlers in lib/web_services
+	return TRUE;
 }
 
 /**

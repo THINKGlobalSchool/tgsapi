@@ -214,6 +214,13 @@ function tgsapi_get_subtypes() {
 		'label' => elgg_echo('all')
 	);
 	
+	// Not using photos, we only use batches
+	$key = array_search('image', $subtypes);
+	if ($key !== FALSE) {
+		unset($subtypes[$key]);
+	}
+
+	// Create a formatted array of subtypes for api use
 	foreach ($subtypes as $subtype) {
 		$subtypes_array[] = array(
 			'subtype' => $subtype,
@@ -222,4 +229,19 @@ function tgsapi_get_subtypes() {
 	}
 
 	return $subtypes_array;
+}
+
+/**
+ * Check for valid version
+ */
+function tgsapi_check_version() {
+	$client_version = get_input('v');
+	$api_version = elgg_get_config('tgsapi_version');
+	
+	if (!$client_version) {
+		throw new Exception(elgg_echo('tgsapi:error:outofdate'));
+	} else if ((int)$client_version != (int)$api_version) {
+		$error = elgg_echo('tgsapi:error:versionmismatch', array($client_version, $api_version));
+		throw new Exception($error);
+	}
 }

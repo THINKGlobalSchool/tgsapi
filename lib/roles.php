@@ -36,7 +36,7 @@ function tgsapi_get_roles($limit = 0, $show_all = TRUE, $show_hidden = FALSE) {
 	
 	if ($show_all) {
 		$role_array[] = array(
-			'guid' => 0,
+			'guid' => '0',
 			'name' => elgg_echo('all'),
 		);
 	}

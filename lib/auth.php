@@ -12,6 +12,8 @@
  * @throws LoginException
  */
 function auth_get_infinity_token($username, $password) {
+	tgsapi_check_version();
+	
 	// Use elgg's authentication
 	$result = elgg_authenticate($username, $password);
 	if ($result !== true) {

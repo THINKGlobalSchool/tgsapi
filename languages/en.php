@@ -36,6 +36,10 @@ $english = array(
 	// Cleaner password error
 	'APIException:MissingParameterInMethod' => 'Missing parameter \'%s\'',
 	
+	// Other errors
+	'tgsapi:error:versionmismatch' => 'This client is using api version %s. The api requires version %s. Please update the app',
+	'tgsapi:error:outofdate' => 'This app requires an update',
+	
 );
 
 add_translation("en",$english);
