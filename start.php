@@ -418,8 +418,13 @@ function tgsapi_global_init() {
 
 // Use custom authentication handlers for the api
 function tgsapi_init_handler() {
-	// @TODO TESTING ONLY
-//	register_pam_handler('pam_auth_session');
+	// Admins can debug
+	if (elgg_is_admin_logged_in()) {
+		register_pam_handler('pam_auth_session');
+	}
+	
+	// Global version check
+	tgsapi_check_version();
 
 	// user token can also be used for user authentication
 	register_pam_handler('pam_auth_usertoken');

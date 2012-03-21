@@ -6,9 +6,6 @@
 
 require_once("../../engine/start.php");
 
-// This will allow session logins
-register_pam_handler('pam_auth_session');
-
 // Admins only
 if (!elgg_is_admin_logged_in()) {
 	echo "Access Denied";

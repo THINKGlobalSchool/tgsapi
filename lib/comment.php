@@ -9,27 +9,31 @@
  */
 function comment_post($activity_id, $text) {
 
-	// get an activity
+	// Get the activity item
     $activity = elgg_get_river(array('id' => $activity_id));
 
-	// If have no activity, get outta here
+	// If we have no activity, get outta here
 	if (!count($activity)) {
 		return FALSE;
 	}
 	
 	$activity = $activity[0];
 
-	// get object related to activity
+	// Get object related to activity
     $object_guid = $activity->object_guid;
 
-	// get object
+	// Get object
 	$object = get_entity($object_guid);
 
-	// get type of activity
+	// Get type of activity
     $type = $object->getSubtype() ? $object->getSubtype() : $object->getType();
 
-	// create comment
     $user = elgg_get_logged_in_user_entity();
+	
+	// Set generic_comment input for plugins that hook into 'annotate' 'object'
+	set_input('generic_comment', $text);
+	
+	// Create the comment
     $res = create_annotation($object_guid, 'generic_comment', $text, '', $user->guid, ACCESS_LOGGED_IN);
 
     if ($res) {
