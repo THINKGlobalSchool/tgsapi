@@ -39,6 +39,7 @@ $english = array(
 	// Other errors
 	'tgsapi:error:versionmismatch' => 'This client is using api version %s. The api requires version %s. Please update the app from Self Service',
 	'tgsapi:error:outofdate' => 'This app requires an update from Self Service',
+	'tgsapi:error:invalidfile' => 'Invalid File',
 	
 );
 

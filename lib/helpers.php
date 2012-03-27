@@ -232,6 +232,54 @@ function tgsapi_get_subtypes() {
 }
 
 /**
+ *	Get 'file' info
+ */
+function tgsapi_get_file_info($file) {
+	if (!elgg_instanceof($file, 'object', 'file')) {
+		return FALSE;
+	}
+	
+	// Get info
+	$path = pathinfo($file->getFilenameOnFilestore());
+
+	// Get extension
+	$extension = ".{$path['extension']}";
+	
+	// Prettier file name (in case title includes extension)
+	$file_name = str_replace($extension, '', $file->title) . $extension;
+
+	// Use the files plugin hook to get the thumbnail url
+	$thumb_url = file_icon_url_override(null, null, null, array(
+		'entity' => $file,
+		'size' => 'small',
+	));
+	
+	// Formatted array
+	return array(
+		'file_url' => elgg_get_site_url() . "file/download/$file->guid",
+		'file_name' => $file_name,
+		'file_thumbnail' => elgg_get_site_url() . $thumb_url,
+		'file_size' => tgsapi_format_size(filesize($file->getFilenameOnFilestore())),
+	);
+}
+
+/**
+ * Get filesize for display
+ */
+function tgsapi_format_size($size) {
+    if (!is_numeric($size)) {
+        return '';
+    }
+    if ($size >= 1000000000) {
+        return number_format(($size / 1000000000), 2) . ' GB';
+    }
+    if ($size >= 1000000) {
+        return number_format(($size / 1000000), 2) . ' MB';
+    }
+    return number_format(($size / 1000), 2) . ' KB';
+}
+
+/**
  * Check for valid version
  */
 function tgsapi_check_version() {

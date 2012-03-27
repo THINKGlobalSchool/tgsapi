@@ -225,7 +225,16 @@ function tgsapi_feedback_activity_handler($hook, $type, $return, $params) {
  */
 function tgsapi_file_activity_handler($hook, $type, $return, $params) {
 	$object = $params['object'];
-	$return['description'] = $return['brief_description'];
+	$return['brief_description'];
+	$return['description'] = '';
+	// Try to grab a supported file url (to view file in app)
+	$file_info = tgsapi_get_file_info($object);
+	
+	// Got one, include it.
+	if ($file_info) {
+		$return['files'][] = $file_info;
+	}
+
 	return $return;
 }
 

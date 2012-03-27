@@ -7,9 +7,7 @@
  * @author Jeff Tilson
  * @copyright Think Global School 2009-2010
  * @link http://www.thinkglobalschool.com
- * 
- * @TODO:
- * - Some sort of upgrade available detection (as the API will be incompatible with older clients)
+ *
  */
 
 // Only register in REST context :D

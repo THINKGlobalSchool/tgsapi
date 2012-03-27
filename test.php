@@ -17,7 +17,7 @@ $env = get_input('env');
 switch (@$env) {
 	case 'local':
 	default:
-		$site = 'http://192.168.0.111/elgg/';
+		$site = 'http://192.168.0.119/elgg/';
 		$user_guid = get_user_by_username('jtilson')->guid;
 		break;
 	case 'spot18':
