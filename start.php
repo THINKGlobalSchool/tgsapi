@@ -418,7 +418,7 @@ function tgsapi_global_init() {
 function tgsapi_init_handler() {
 	// Admins can debug
 	if (elgg_is_admin_logged_in()) {
-		register_pam_handler('pam_auth_session');
+		//register_pam_handler('pam_auth_session');
 	}
 	
 	// Global version check
