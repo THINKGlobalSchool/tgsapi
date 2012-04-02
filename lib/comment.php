@@ -8,37 +8,32 @@
  * @return bool
  */
 function comment_post($activity_id, $text) {
-	// get an activity
-    $activity = get_river_item($activity_id);
-	// get object related to activity
+
+	// Get the activity item
+    $activity = elgg_get_river(array('id' => $activity_id));
+
+	// If we have no activity, get outta here
+	if (!count($activity)) {
+		return FALSE;
+	}
+	
+	$activity = $activity[0];
+
+	// Get object related to activity
     $object_guid = $activity->object_guid;
 
-	// get type of activity
-    $type = get_activity_type($activity);
+	// Get object
+	$object = get_entity($object_guid);
 
-	// throw error on non-commentable activities
-	$black_list = array(
-		'shared_doc',
-		'site_activity',
-		'messages',
-		'pages_welcome',
-		'plugin',
-		'resourcerequest',
-		'resourcerequesttype',
-		'shared_access',
-		'site',
-		'widget',
-		'googleapps',
-		'forum_topic',
-		'forum_reply',
-	);
+	// Get type of activity
+    $type = $object->getSubtype() ? $object->getSubtype() : $object->getType();
 
-    if (in_array($type, $black_list)) {
-        return 'THIS TYPE OF ACTIVITY IS NOT COMMENTABLE';
-    }
-
-	// create comment
     $user = elgg_get_logged_in_user_entity();
+	
+	// Set generic_comment input for plugins that hook into 'annotate' 'object'
+	set_input('generic_comment', $text);
+	
+	// Create the comment
     $res = create_annotation($object_guid, 'generic_comment', $text, '', $user->guid, ACCESS_LOGGED_IN);
 
     if ($res) {

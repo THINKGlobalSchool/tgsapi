@@ -15,4 +15,4 @@ if ($token) {
 	remove_user_token($token);
 }
 
-forward($_SERVER['HTTP_REFERER']);
+forward(REFERER);

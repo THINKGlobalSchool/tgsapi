@@ -11,7 +11,7 @@
  * @throws SecurityException
  * @throws LoginException
  */
-function auth_get_infinity_token($username, $password) {
+function auth_get_infinity_token($username, $password) {	
 	// Use elgg's authentication
 	$result = elgg_authenticate($username, $password);
 	if ($result !== true) {

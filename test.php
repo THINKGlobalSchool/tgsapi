@@ -4,51 +4,57 @@
  * When you add/change some functionality, add a form or link here to be able to test it.
  */
 
-
 require_once("../../engine/start.php");
 
-	// define environments
-	$env = get_input('env');
-	switch (@$env) {
-		case 'local':
-		default:
-			$site = 'http://192.168.0.111/elgg/';
-			$token = auth_get_infinity_token('jtilson', 'jtilson');
-			$user_guid = get_user_by_username('jtilson')->guid;
-			break;
-		case 'spot18':
-			$site = 'http://spot18.thinkglobalschool.com/';
-			$token = auth_get_infinity_token('testuser1', 'user1pass');
-			$user_guid = get_user_by_username('testuser1')->guid;
-			break;
-	}
+// Admins only
+if (!elgg_is_admin_logged_in()) {
+	echo "Access Denied";
+	return FALSE;
+}
 
-	echo $site;
-	echo "<br /> token = ".$token;
+// define environments
+$env = get_input('env');
+switch (@$env) {
+	case 'local':
+	default:
+		$site = 'http://192.168.0.119/elgg/';
+		$user_guid = get_user_by_username('jtilson')->guid;
+		break;
+	case 'spot18':
+		$site = 'http://spot18.thinkglobalschool.com/';
+		$user_guid = get_user_by_username('testuser1')->guid;
+		break;
+}
+
+echo $site;
 
 ?>
 <html>
-
+	<h1>API TEST</h1>
 	<hr/>
-	<a href="<?=$site?>services/api/rest/xml/?method=activity.list&limit=10&offset=0&auth_token=<?=$token?>">Activity list</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=activity.list&limit=10&offset=0">Activity list</a>
 	<hr />
-	<a href="<?=$site?>services/api/rest/xml/?method=profile.show&user_id=<?php echo $user_guid; ?>&limit=10&offset=0&auth_token=<?=$token?>">user profile</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=profile.show&user_id=<?php echo $user_guid; ?>&limit=10&offset=0">user profile</a>
 	<hr />
-	<a href="<?=$site?>services/api/rest/xml/?method=comments.list&object_id=22178&auth_token=<?=$token?>">Comment list for object</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=comments.list&object_id=22178">Comment list for object</a>
 	<hr />
-	<a href="<?=$site?>services/api/rest/xml/?method=albums.list&auth_token=<?=$token?>">Albums list for user</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=albums.list">Albums list for user</a>
 	<hr/>
-	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=complete&limit=10&offset=0&user_role=owned&auth_token=<?=$token?>">Completed ToDo list (owned)</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=complete&limit=10&offset=0&user_role=owned">Completed ToDo list (owned)</a>
 <hr/>
-	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=complete&limit=10&offset=0&user_role=assigned&auth_token=<?=$token?>">Completed ToDo list (assigned)</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=complete&limit=10&offset=0&user_role=assigned">Completed ToDo list (assigned)</a>
 	<hr/>
-	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=incomplete&limit=10&offset=0&user_role=owned&auth_token=<?=$token?>">Incompleted ToDo list (owned)</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=incomplete&limit=10&offset=0&user_role=owned">Incompleted ToDo list (owned)</a>
 	<hr/>
-	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=incomplete&limit=10&offset=0&user_role=assigned&auth_token=<?=$token?>">Incompleted ToDo list (assigned)</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=todo.list&status=incomplete&limit=10&offset=0&user_role=assigned">Incompleted ToDo list (assigned)</a>
 	<hr/>
-	<a href="<?=$site?>services/api/rest/xml/?method=todos.count&status=unaccepted&user_role=assigned&auth_token=<?=$token?>">Count unaccepted todos assigned to me</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=todos.count&status=unaccepted&user_role=assigned">Count unaccepted todos assigned to me</a>
 	<hr/>
-	<a href="<?=$site?>services/api/rest/xml/?method=todo.show&todo_id=32217876&auth_token=<?=$token?>">Get todo details</a>
+	<a href="<?=$site?>services/api/rest/xml/?method=todo.show&todo_id=32217876">Get todo details</a>
+	<hr />
+	<a href="<?=$site?>services/api/rest/xml/?method=roles.list">Get roles</a>
+	<hr />
+	<a href="<?=$site?>services/api/rest/xml/?method=subtypes.list">Get subtypes</a>
 	<hr />
 POST photo
 <form action="<?=$site?>services/api/rest/xml/?method=photo.add" enctype="multipart/form-data" method="post">
