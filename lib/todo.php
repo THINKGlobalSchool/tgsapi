@@ -12,14 +12,13 @@
 function todo_list($status = 'incomplete', $limit = 10, $offset = 0, $user_role = 'all') {
 	// get user guid
 	$user_guid = elgg_get_logged_in_user_guid();
-
 	
 	// Using TODO lib method :D:D:D
 	$options = array(
 		'container_guid' => $user_guid,
 		'status' => $status,
 		'context' => $user_role,
-		'sort_order' => 'ASC',
+		'sort_order' => 'DESC',
 		'list' => FALSE,
 	);
 
