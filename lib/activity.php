@@ -282,10 +282,36 @@ function tgsapi_shared_doc_activity_handler($hook, $type, $return, $params) {
  */
 function tgsapi_site_activity_activity_handler($hook, $type, $return, $params) {
 	$object = $params['object'];
-	$text = str_replace($return['subject_name'], '', strip_tags($object->text));
-    $return['brief_description'] = ucfirst(trim($text));
+
+	$action = googleapps_get_river_verb_from_category_label($object->category_label);
+	$owner = $object->getOwnerEntity();
+
+	// If the owner is an actual user, display owner link
+	if (!elgg_instanceof($owner, 'group')) {
+		$owner_text = "<a href='" . $owner->getURL . "'>" . $owner->name . "</a>";	
+	} else {
+		$owner_text = $object->author_name;
+	}
+	
+	$summary_link = $object->summary_link;
+	
+	$site_text = "<a target='_blank' href='" . $object->site_url . "'>" . $object->site_name . "</a>";
+
+	$string = elgg_echo('river:create:object:site_activity', array(
+		'', ucfirst($action), $summary_link, $site_text
+	));
+	
+	$string = trim($string);
+	
+	$return['brief_description'] = $string;
 	$return['description'] = $return['brief_description'];
-	$return['url'] = get_pure_url($object->text, false);
+	$return['url'] = get_pure_url($object->summary_link);
+
+	// Display name of editing user if the owner is a group (non spot member)
+	if (elgg_instanceof($owner, 'group')) {
+		$return['subject_name'] = $object->author_name;
+	}
+	
 	return $return;
 }
 
