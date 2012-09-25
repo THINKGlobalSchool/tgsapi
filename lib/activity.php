@@ -299,7 +299,7 @@ function tgsapi_site_activity_activity_handler($hook, $type, $return, $params) {
 	
 		$site_text = "<a target='_blank' href='" . $object->site_url . "'>" . $object->site_name . "</a>";
 
-		$string = elgg_echo('river:create:object:site_activity', array(
+		$string = elgg_echo('river:create:object:site_activity_custom', array(
 			'', ucfirst($action), $summary_link, $site_text
 		));
 	
@@ -424,7 +424,7 @@ function tgsapi_todosubmission_activity_handler($hook, $type, $return, $params) 
 function tgsapi_forum_topic_activity_handler($hook, $type, $return, $params) {
 	$object = $params['object'];
 	$forum = $object->getContainerEntity();
-	$text = elgg_echo('river:create:object:forum_topic', array('', "\"{$object->title}\"", "\"{$forum->title}\""));
+	$text = elgg_echo('river:create:object:forum_topic_river', array('', "\"{$object->title}\"", "\"{$forum->title}\""));
 	$return['brief_description'] = ucfirst(trim($text));
 	$return['description'] = $return['brief_description'];
 	return $return;
@@ -443,7 +443,7 @@ function tgsapi_forum_reply_activity_handler($hook, $type, $return, $params) {
 	$object = $params['object'];
 	$topic = get_entity($object->topic_guid);
 	$forum = $object->getContainerEntity();
-	$text = elgg_echo('river:create:object:forum_reply', array('', "\"{$topic->title}\"", "\"{$forum->title}\""));
+	$text = elgg_echo('river:create:object:forum_reply_river', array('', "\"{$topic->title}\"", "\"{$forum->title}\""));
 	$return['brief_description'] = ucfirst(trim($text));
 	$return['description'] = $return['brief_description'] . "\n\n" . $object->description;
 	return $return;
