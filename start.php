@@ -437,5 +437,6 @@ function tgsapi_init_handler() {
 function tgsapi_adminmenu() {
 	if (elgg_in_context('admin')) {
 		elgg_register_admin_menu_item('administer', 'tokens', 'tgsapi');
+		elgg_register_admin_menu_item('administer', 'logging', 'tgsapi');
 	}
 }

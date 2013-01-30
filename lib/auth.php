@@ -33,6 +33,10 @@ function auth_get_infinity_token($username, $password) {
 
 	// Good to go, create token valid for about 100 years
     $token = create_user_token($username, 60 * 24 * 365 * 100);
+
+    // Log auth_gettoken
+	tgsapi_create_log_annotation('auth_gettoken');
+
     if ($token) {
         return $token;
     }

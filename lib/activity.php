@@ -15,6 +15,9 @@ function activity_list($limit = 10, $offset = 0, $subtype = NULL, $role = NULL, 
 	// Unregister mentions rewrite handler.. it causes all kinds of hell with the JSON response
 	elgg_unregister_plugin_hook_handler('output', 'page', 'mentions_rewrite');
 
+	// Log activity list
+	tgsapi_create_log_annotation('activity_list');
+	
 	// Default options
 	$options = array(
 		'action_types' => array('create'),

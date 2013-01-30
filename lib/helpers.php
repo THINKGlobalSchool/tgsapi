@@ -293,3 +293,49 @@ function tgsapi_check_version() {
 		throw new Exception($error);
 	}
 }
+
+/**
+ * Create an api log annotation
+ *
+ * @param string $action    The action performed
+ * @param int    $user_guid (Optional)
+ */
+function tgsapi_create_log_annotation($action, $user_guid = 0) {
+    $api = elgg_get_plugin_from_id('tgsapi');
+    
+    // Create log annoation
+    $annotation = create_annotation($api->guid,
+                                'tgsapi_logging',
+                                $action,
+                                "",
+                                $user_guid,
+                                $api->access_id);
+}
+
+/**
+ * Returns a rendered list of api logging annotations, plus pagination. This function
+ * should be called by wrapper functions.
+ *
+ * @param array $annotations Array of annotations
+ * @param array $vars        Display variables
+ *      'count'      The total number of annotations across all pages
+ *      'offset'     The current indexing offset
+ *      'limit'      The number of annotations to display per page
+ *      'full_view'  Display the full view of the annotation?
+ *      'list_class' CSS Class applied to the list
+ *      'offset_key' The url parameter key used for offset
+ *
+ * @return string The list of annotations
+ * @access private
+ */
+function tgsapi_view_log_annotation_list($annotations, array $vars = array()) {
+    $defaults = array(
+        'items' => $annotations,
+        'full_view' => true,
+        'offset_key' => 'annoff',
+    );
+
+    $vars = array_merge($defaults, $vars);
+
+    return elgg_view('tgsapi/log_list', $vars);
+}

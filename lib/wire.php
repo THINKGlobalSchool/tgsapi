@@ -12,7 +12,7 @@
 function api_post_to_wire($text, $lat = NULL, $long = NULL) {
 	// access level
 	$access = ACCESS_LOGGED_IN;
-	
+
 	// Elgg 1.8 requires the user_id now aswell
 	$user_guid = elgg_get_logged_in_user_guid();
 

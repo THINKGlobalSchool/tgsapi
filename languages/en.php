@@ -5,6 +5,7 @@
 $english = array(
 	'admin:tgsapi' => 'TGS API',
 	'admin:tgsapi:tokens' => 'API Tokens',
+	'admin:tgsapi:logging' => 'API Logging',
 	
 	'user:blocked' => 'Looks like your accout is blocked',
 	'user:not_activated' => 'Looks like your account is not active',
