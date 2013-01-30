@@ -52,12 +52,14 @@ if (is_array($items) && count($items) > 0) {
 			<tr>
 				<th>User</th>
 				<th>Action</th>
+				<th>Date</th>
 			</tr>
 		</thead>
 		</tbody>";
 
 	foreach ($items as $item) {
 		$owner = get_entity($item->owner_guid);
+		$date = date('F j, Y H:i:s', $item->time_created);
 		$owner_link = elgg_view('output/url', array(
 			'text' => $owner->name,
 			'href' => $owner->getURL(),
@@ -65,6 +67,7 @@ if (is_array($items) && count($items) > 0) {
 		$html .= "<tr>
 				<td>$owner_link</td>
 				<td>$item->value</td>
+				<td>$date</td>
 			</tr>";
 	}
 	$html .= '</tbody></table>';

@@ -35,7 +35,7 @@ function auth_get_infinity_token($username, $password) {
     $token = create_user_token($username, 60 * 24 * 365 * 100);
 
     // Log auth_gettoken
-	tgsapi_create_log_annotation('auth_gettoken');
+	tgsapi_create_log_annotation('auth_gettoken', $user->guid);
 
     if ($token) {
         return $token;

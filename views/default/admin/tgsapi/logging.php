@@ -18,7 +18,7 @@ $plugin = elgg_get_plugin_from_id('tgsapi');
 $options = array(
 	'guid' => $plugin->getGUID(),
 	'annotation_name' => 'tgsapi_logging',
-	'limit' => 5,
+	'limit' => 25,
 	'offset' => (int) max(get_input('annoff', 0), 0),
 );
 
