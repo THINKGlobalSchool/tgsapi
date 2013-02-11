@@ -259,14 +259,6 @@ function tgsapi_expose_functions() {
             'album_id' => array(
                 'type' => 'integer',
                 'required' => FALSE
-            ),
-            'lat' => array(
-                'type' => 'string',
-                'required' => FALSE
-            ),
-            'long' => array(
-                'type' => 'string',
-                'required' => FALSE
             )
 	), 'Add photo', 'POST', FALSE, TRUE);
 

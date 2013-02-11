@@ -61,7 +61,7 @@ function find_or_create_mobile_album() {
  * Geotagging:
  * If the photo has geotags in exif, they will be used as photo's entity location.
  * If it has no, passed location will be used.
- * If there are no neather exif geotag, nor passed location, current user's location will be used.
+ * If there are no exif geotag, nor passed location, current user's location will be used.
  *
  * Not required params:
  * There were some issues with using not required params in elgg expose_function, so we'll get them
@@ -70,33 +70,32 @@ function find_or_create_mobile_album() {
  * @param string $title photo's title
  * @param string $caption photo's caption
  * @param string $tags tags (comma separated)
- * @param int $album_guid album guid where the photo should be placed. If empty, it'll be uploaded into the album mobile uploads
- * @param float $lat latitude
- * @param float $long longitude
+ * @param int $album_guid album guid. If empty, it'll be uploaded into the album 'mobile uploads'
  * @return true|string true on success and string (message) on error
  */
-function photo_add($title, $caption = '', $tags = '', $album_guid, $lat, $long) {
-	// if there are no files, return error message
-	if (count($_FILES) == 0) {
-	    return 'no files';
+function photo_add($title, $caption = '', $tags = '', $album_guid = null) {
+	elgg_load_library('tidypics:upload');
+
+	// Check to make sure something was uploaded, if not probably POST limit exceeded
+	if (empty($_FILES)) {
+		trigger_error('Tidypics warning: user exceeded post limit on image upload', E_USER_WARNING);
+		return elgg_echo('tidypics:exceedpostlimit');
 	}
 
+	// Get photo file
+	$file = $_FILES['photo'];
+
 	// get geotag
-	foreach ($_FILES as $file) {   
-		$exif = exif_read_data($file['tmp_name']);
+	$exif = exif_read_data($file['tmp_name']);
 
-		// if have exif values, use them, else use passed
-		if (isset($exif["GPSLongitude"])) {
-			$lon = getGps($exif["GPSLongitude"], $exif['GPSLongitudeRef']            );
-			$lat = getGps($exif["GPSLatitude"], $exif['GPSLatitudeRef']);
-		} else {
-			$lat = (string) get_input('lat');
-			$lon = (string) get_input('long');
-		}
-	} 
-
-	// get album id
-	$album_guid = get_input('album_id');
+	// if have exif values, use them, else use passed
+	if (isset($exif["GPSLongitude"])) {
+		$lon = getGps($exif["GPSLongitude"], $exif['GPSLongitudeRef']            );
+		$lat = getGps($exif["GPSLatitude"], $exif['GPSLatitudeRef']);
+	} else {
+		$lat = (string) get_input('lat');
+		$lon = (string) get_input('long');
+	}
 
 	// if there is no album, use album mobile uploads (it'll be created if it doesn't exist)
 	if (empty($album_guid)) {
@@ -106,40 +105,44 @@ function photo_add($title, $caption = '', $tags = '', $album_guid, $lat, $long) 
 	// Get the album entity
 	$album = get_entity($album_guid);
 
-	// we'll use tidypics uploader, so we need to set REQUEST as when photo is uploaded from site
-	$_REQUEST['album_guid'] = $album_guid;
-	$_REQUEST['container_guid'] = $album_guid;
-	$_REQUEST['access_id'] = $album->access_id; // Need to set this to the containers access id, otherwise, explosions
 
-	// tidypics should not forward to the site
-	// if it redirects to the edit details screen, it means that our patch for tidypics was not applyed
-	$not_forward = true;
-
-	// make upload
-	require_once (elgg_get_plugins_path() . "tidypics/actions/upload.php");
-
-	// now we should emulate edit details screen
-	// set up another REQUEST params
-	$title = strlen(get_input('title')) != 0 ? get_input('title') : '';
-
-	$_REQUEST['title'] = array($title);
-	$_REQUEST['caption'] = array(get_input('caption'));
-	$_REQUEST['tags'] = array(get_input('tags'));
-	$_REQUEST['image_guid'] = $uploaded_images;
-	$_REQUEST['container_guid'] = $album_guid;
-	
-	// set params to the posted photo
-	require_once (elgg_get_plugins_path() . "tidypics/actions/edit_multi.php");
-
-	if (count($uploaded_images) > 0) {
-		// set geotag
-		$entity = get_entity($uploaded_images[0]);
-		if ($entity) {
-			entity_set_lat_long($entity, $lat, $lon);
-		}
+	if ($tags) {
+		$tags = string_to_tag_array($tags);
+		$tags = array_unique(array_merge($tags, $album->tags));
+	} else {
+		$tags = $album->tags;
 	}
 
-	return true;
+	// Create image entity
+	$mime = tp_upload_get_mimetype($file['name']);
+	if ($mime == 'unknown') {
+		return elgg_echo('tidypics:not_image');
+	}
+
+	$image = new TidypicsImage();
+	$image->container_guid = $album->guid;
+	$image->title = $title;
+	$image->description = $caption;
+	$image->setMimeType($mime);
+	$image->access_id = $album->access_id;
+	$image->tags = $tags;
+
+	try {
+		$image->save($file);
+		$album->prependImageList(array($image->guid));
+
+		// Skip batching
+		add_to_river('river/object/image/create', 'create', $image->getOwnerGUID(), $image->getGUID());
+		
+
+		entity_set_lat_long($image, $lat, $lon);
+
+		// All good!
+		return true;
+	} catch (Exception $e) {
+		// Not good, return exception
+		return $e->getMessage();
+	}
 }
 
 /**
