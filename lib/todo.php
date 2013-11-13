@@ -15,7 +15,7 @@ function todo_list($status = 'incomplete', $limit = 10, $offset = 0, $user_role 
 	
 	// Using TODO lib method :D:D:D
 	$options = array(
-		'container_guid' => $user_guid,
+		'assignee_guid' => $user_guid,
 		'status' => $status,
 		'context' => $user_role,
 		'sort_order' => 'DESC',
